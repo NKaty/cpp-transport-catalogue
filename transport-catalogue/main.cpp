@@ -11,6 +11,6 @@ using transport_catalogue::stat_parser::ParseStatRequests;
 int main() {
   transport_catalogue::TransportCatalogue catalogue;
   ParseInput(cin, catalogue);
-  ParseStatRequests(cin, catalogue);
+  ParseStatRequests(cin, cout, catalogue);
   return 0;
 }

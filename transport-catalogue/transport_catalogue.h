@@ -75,15 +75,15 @@ std::ostream &operator<<(std::ostream &os, const std::set<Value> &collection) {
 
 class TransportCatalogue {
  public:
-  void AddStop(detail::Stop stop);
+  void AddStop(detail::Stop &&stop);
 
-  void AddBus(detail::Bus bus);
+  void AddBus(detail::Bus &&bus);
 
   void AddDistance(const detail::StopsDistance &distance);
 
-  [[nodiscard]] detail::Bus FindBus(std::string_view name) const;
+  [[nodiscard]] const detail::Bus &FindBus(std::string_view name) const;
 
-  [[nodiscard]] detail::Stop FindStop(std::string_view name) const;
+  [[nodiscard]] const detail::Stop &FindStop(std::string_view name) const;
 
   [[nodiscard]] std::optional<detail::RouteStat> GetRouteStat(std::string_view bus_name) const;
 

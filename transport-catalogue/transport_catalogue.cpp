@@ -27,13 +27,13 @@ RouteStat::RouteStat(const Bus &bus) : bus_name(bus.name),
 }
 }
 
-void TransportCatalogue::AddStop(detail::Stop stop) {
+void TransportCatalogue::AddStop(detail::Stop &&stop) {
   const auto it = stops_list_.insert(stops_list_.begin(), std::move(stop));
   stops_[it->name] = &(*it);
   buses_through_stop_[it->name] = {};
 }
 
-void TransportCatalogue::AddBus(detail::Bus bus) {
+void TransportCatalogue::AddBus(detail::Bus &&bus) {
   const auto it = buses_list_.insert(buses_list_.begin(), std::move(bus));
   transform(
       it->stops_on_route.begin(),
@@ -57,11 +57,11 @@ void TransportCatalogue::AddDistance(const detail::StopsDistance &distance) {
                                    distance.distance});
 }
 
-detail::Bus TransportCatalogue::FindBus(string_view name) const {
+const detail::Bus &TransportCatalogue::FindBus(string_view name) const {
   return *buses_.at(name);
 }
 
-detail::Stop TransportCatalogue::FindStop(string_view name) const {
+const detail::Stop &TransportCatalogue::FindStop(string_view name) const {
   return *stops_.at(name);
 }
 
