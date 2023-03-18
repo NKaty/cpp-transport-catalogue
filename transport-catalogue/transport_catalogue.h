@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geo.h"
+#include "domain.h"
 
 #include <string>
 #include <unordered_map>
@@ -14,64 +14,6 @@
 using namespace std::string_literals;
 
 namespace transport_catalogue {
-namespace detail {
-struct PairHash {
-  template<typename T>
-  size_t operator()(const std::pair<T, T> &p) const {
-    return (std::hash<T>()(p.first) * 31) ^ (std::hash<T>()(p.second) * 37);
-  }
-};
-
-struct Stop {
-  std::string name;
-  geo::Coordinates coordinates;
-};
-
-enum class RouteType { CIRCULAR, LINEAR };
-
-struct Bus {
-  std::string name;
-  std::vector<std::string_view> stops_on_route;
-  size_t unique_stops_count = 0;
-  RouteType route_type;
-  double geo_route_distance = 0.;
-  int route_distance = 0;
-  double curvature = 0.;
-  [[nodiscard]] size_t GetStopCount() const;
-};
-
-struct RouteStat {
-  RouteStat() = default;
-  explicit RouteStat(const Bus &bus);
-  std::string_view bus_name;
-  size_t stops_count = 0;
-  size_t unique_stops_count = 0;
-  double route_distance = 0.;
-  double curvature = 0.;
-};
-
-struct StopsDistance {
-  std::string stop_from;
-  std::string stop_to;
-  int distance = 0;
-};
-
-std::ostream &operator<<(std::ostream &os, const RouteStat &route_stat);
-
-template<typename Value>
-std::ostream &operator<<(std::ostream &os, const std::set<Value> &collection) {
-  bool first = true;
-  for (const auto item : collection) {
-    if (first) {
-      os << item;
-      first = false;
-    } else {
-      os << " "s << item;
-    }
-  }
-  return os;
-}
-}
 
 class TransportCatalogue {
  public:
@@ -88,6 +30,12 @@ class TransportCatalogue {
   [[nodiscard]] std::optional<detail::RouteStat> GetRouteStat(std::string_view bus_name) const;
 
   [[nodiscard]] const std::set<std::string_view> *GetBusesThroughStop(std::string_view stop_name) const;
+
+  [[nodiscard]] std::vector<const detail::Bus *> GetAllBuses() const;
+
+  [[nodiscard]] const std::unordered_map<std::string_view, const detail::Stop *> &GetAllStops() const;
+
+  [[nodiscard]] std::vector<geo::Coordinates> GetStopCoords() const;
 
  private:
   std::deque<detail::Stop> stops_list_;
@@ -123,4 +71,5 @@ template<typename F, typename T, typename I>
       distance_getter
   );
 }
+
 }

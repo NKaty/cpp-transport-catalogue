@@ -2,38 +2,21 @@
 
 #include <iostream>
 #include <algorithm>
-#include <iomanip>
 
 using namespace std;
 
 namespace transport_catalogue {
-namespace detail {
-ostream &operator<<(ostream &os, const RouteStat &route_stat) {
-  os << setprecision(6) << "Bus "s << route_stat.bus_name << ": "s << route_stat.stops_count
-     << " stops on route, "s << route_stat.unique_stops_count << " unique stops, "s
-     << route_stat.route_distance << " route length, "s << route_stat.curvature << " curvature"s;
-  return os;
-}
 
-size_t Bus::GetStopCount() const {
-  return route_type == RouteType::CIRCULAR ? stops_on_route.size() : stops_on_route.size() * 2 - 1;
-}
+using namespace detail;
+using namespace geo;
 
-RouteStat::RouteStat(const Bus &bus) : bus_name(bus.name),
-                                       stops_count(bus.GetStopCount()),
-                                       unique_stops_count(bus.unique_stops_count),
-                                       route_distance(bus.route_distance),
-                                       curvature(bus.curvature) {
-}
-}
-
-void TransportCatalogue::AddStop(detail::Stop &&stop) {
+void TransportCatalogue::AddStop(Stop &&stop) {
   const auto it = stops_list_.insert(stops_list_.begin(), std::move(stop));
   stops_[it->name] = &(*it);
   buses_through_stop_[it->name] = {};
 }
 
-void TransportCatalogue::AddBus(detail::Bus &&bus) {
+void TransportCatalogue::AddBus(Bus &&bus) {
   const auto it = buses_list_.insert(buses_list_.begin(), std::move(bus));
   transform(
       it->stops_on_route.begin(),
@@ -57,15 +40,15 @@ void TransportCatalogue::AddDistance(const detail::StopsDistance &distance) {
                                    distance.distance});
 }
 
-const detail::Bus &TransportCatalogue::FindBus(string_view name) const {
+const Bus &TransportCatalogue::FindBus(string_view name) const {
   return *buses_.at(name);
 }
 
-const detail::Stop &TransportCatalogue::FindStop(string_view name) const {
+const Stop &TransportCatalogue::FindStop(string_view name) const {
   return *stops_.at(name);
 }
 
-optional<detail::RouteStat> TransportCatalogue::GetRouteStat(string_view bus_name) const {
+optional<RouteStat> TransportCatalogue::GetRouteStat(string_view bus_name) const {
   const auto it = buses_.find(bus_name);
   if (it == buses_.end()) {
     return nullopt;
@@ -73,7 +56,7 @@ optional<detail::RouteStat> TransportCatalogue::GetRouteStat(string_view bus_nam
   return detail::RouteStat(*it->second);
 }
 
-double TransportCatalogue::CalculateGeoRouteDistance(const detail::Bus &bus) const {
+double TransportCatalogue::CalculateGeoRouteDistance(const Bus &bus) const {
   double route_distance = SumDistances(bus.stops_on_route.begin(),
                                        bus.stops_on_route.end(),
                                        0.,
@@ -84,7 +67,7 @@ double TransportCatalogue::CalculateGeoRouteDistance(const detail::Bus &bus) con
   return bus.route_type == detail::RouteType::CIRCULAR ? route_distance : route_distance * 2;
 }
 
-[[nodiscard]] int TransportCatalogue::CalculateRouteDistance(const detail::Bus &bus) const {
+[[nodiscard]] int TransportCatalogue::CalculateRouteDistance(const Bus &bus) const {
   const auto getter = [this](string_view stop_from, string_view stop_to) {
     const auto it = distances_between_stops_.find({stops_.at(stop_from), stops_.at(stop_to)});
     if (it != distances_between_stops_.end()) {
@@ -112,4 +95,39 @@ const set<string_view> *TransportCatalogue::GetBusesThroughStop(string_view stop
   }
   return &it->second;
 }
+
+vector<const Bus *> TransportCatalogue::GetAllBuses() const {
+  vector<const Bus *> buses(buses_.size());
+  transform(
+      std::execution::par,
+      buses_.begin(), buses_.end(),
+      buses.begin(),
+      [](const auto &item) {
+        return item.second;
+      });
+
+  sort(
+      execution::par,
+      buses.begin(), buses.end(),
+      [](auto lhs, auto rhs) {
+        return lhs->name < rhs->name;
+      });
+  return buses;
+}
+
+const unordered_map<string_view, const Stop *> &TransportCatalogue::GetAllStops() const {
+  return stops_;
+}
+
+[[nodiscard]] vector<Coordinates> TransportCatalogue::GetStopCoords() const {
+  vector<Coordinates> stop_coords;
+  stop_coords.reserve(stops_.size());
+  for (const auto &[stop_name, stop] : stops_) {
+    if (!GetBusesThroughStop(stop_name)->empty()) {
+      stop_coords.emplace_back(stop->coordinates);
+    }
+  }
+  return stop_coords;
+}
+
 }
