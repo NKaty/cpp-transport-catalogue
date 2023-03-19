@@ -13,7 +13,6 @@ using namespace geo;
 void TransportCatalogue::AddStop(Stop &&stop) {
   const auto it = stops_list_.insert(stops_list_.begin(), std::move(stop));
   stops_[it->name] = &(*it);
-  buses_through_stop_[it->name] = {};
 }
 
 void TransportCatalogue::AddBus(Bus &&bus) {
@@ -23,7 +22,7 @@ void TransportCatalogue::AddBus(Bus &&bus) {
       it->stops_on_route.end(),
       it->stops_on_route.begin(),
       [this, &it](string_view stop) {
-        buses_through_stop_[stop].insert(it->name);
+        stops_[stop]->buses_through_stop.insert(it->name);
         return string_view(stops_[stop]->name);
       }
   );
@@ -89,11 +88,11 @@ double TransportCatalogue::CalculateGeoRouteDistance(const Bus &bus) const {
 }
 
 const set<string_view> *TransportCatalogue::GetBusesThroughStop(string_view stop_name) const {
-  const auto it = buses_through_stop_.find(stop_name);
-  if (it == buses_through_stop_.end()) {
+  const auto it = stops_.find(stop_name);
+  if (it == stops_.end()) {
     return nullptr;
   }
-  return &it->second;
+  return &it->second->buses_through_stop;
 }
 
 vector<const Bus *> TransportCatalogue::GetAllBuses() const {
@@ -115,19 +114,8 @@ vector<const Bus *> TransportCatalogue::GetAllBuses() const {
   return buses;
 }
 
-const unordered_map<string_view, const Stop *> &TransportCatalogue::GetAllStops() const {
+const unordered_map<string_view, Stop *> &TransportCatalogue::GetAllStops() const {
   return stops_;
-}
-
-[[nodiscard]] vector<Coordinates> TransportCatalogue::GetStopCoords() const {
-  vector<Coordinates> stop_coords;
-  stop_coords.reserve(stops_.size());
-  for (const auto &[stop_name, stop] : stops_) {
-    if (!GetBusesThroughStop(stop_name)->empty()) {
-      stop_coords.emplace_back(stop->coordinates);
-    }
-  }
-  return stop_coords;
 }
 
 }

@@ -17,7 +17,7 @@ RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue &db
 }
 
 svg::Document RequestHandler::RenderMap() const {
-  return renderer_.RenderMap(db_.GetAllBuses(), db_.GetAllStops(), db_.GetStopCoords());
+  return renderer_.RenderMap(db_.GetAllBuses(), db_.GetAllStops());
 }
 
 }

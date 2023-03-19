@@ -128,16 +128,40 @@ class MapRenderer {
 
   [[nodiscard]] svg::Document RenderMap(const std::vector<const transport_catalogue::detail::Bus *> &buses,
                                         const std::unordered_map<std::string_view,
-                                                                 const transport_catalogue::detail::Stop *> &stops,
-                                        const std::vector<geo::Coordinates> &stop_coords) const;
+                                                                 transport_catalogue::detail::Stop *> &stops) const;
 
  private:
   RenderSettings &settings_;
+
+  static std::vector<geo::Coordinates> GetStopCoords(const std::unordered_map<std::string_view,
+                                                                              transport_catalogue::detail::Stop *> &stops);
+
+  static std::vector<std::string_view> GetStopNames(const std::unordered_map<std::string_view,
+                                                                             transport_catalogue::detail::Stop *> &stops);
 
   void RenderBusLines(svg::Document &document,
                       const SphereProjector &sphere_projector,
                       const std::vector<const transport_catalogue::detail::Bus *> &buses,
                       const std::unordered_map<std::string_view,
-                                               const transport_catalogue::detail::Stop *> &stops) const;
+                                               transport_catalogue::detail::Stop *> &stops) const;
+
+  void RenderBusNames(svg::Document &document,
+                      const SphereProjector &sphere_projector,
+                      const std::vector<const transport_catalogue::detail::Bus *> &buses,
+                      const std::unordered_map<std::string_view,
+                                               transport_catalogue::detail::Stop *> &stops) const;
+
+  void RenderStopCircles(svg::Document &document,
+                         const SphereProjector &sphere_projector,
+                         const std::unordered_map<std::string_view,
+                                                  transport_catalogue::detail::Stop *> &stops,
+                         const std::vector<std::string_view> &stop_names) const;
+
+  void RenderStopNames(svg::Document &document,
+                       const SphereProjector &sphere_projector,
+                       const std::unordered_map<std::string_view,
+                                                transport_catalogue::detail::Stop *> &stops,
+                       const std::vector<std::string_view> &stop_names) const;
 };
+
 }

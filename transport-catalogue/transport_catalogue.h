@@ -33,16 +33,13 @@ class TransportCatalogue {
 
   [[nodiscard]] std::vector<const detail::Bus *> GetAllBuses() const;
 
-  [[nodiscard]] const std::unordered_map<std::string_view, const detail::Stop *> &GetAllStops() const;
-
-  [[nodiscard]] std::vector<geo::Coordinates> GetStopCoords() const;
+  [[nodiscard]] const std::unordered_map<std::string_view, detail::Stop *> &GetAllStops() const;
 
  private:
   std::deque<detail::Stop> stops_list_;
   std::deque<detail::Bus> buses_list_;
-  std::unordered_map<std::string_view, const detail::Stop *> stops_;
+  std::unordered_map<std::string_view, detail::Stop *> stops_;
   std::unordered_map<std::string_view, const detail::Bus *> buses_;
-  std::unordered_map<std::string_view, std::set<std::string_view>> buses_through_stop_;
   std::unordered_map<std::pair<const detail::Stop *, const detail::Stop *>, int, detail::PairHash>
       distances_between_stops_;
 
