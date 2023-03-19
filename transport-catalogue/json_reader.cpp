@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ using namespace svg;
 
 const string BUS = "Bus"s;
 const string STOP = "Stop"s;
+const string MAP = "Map"s;
 
 Bus ParseBusInput(const Dict &request) {
   Bus bus;
@@ -88,6 +90,13 @@ Node GetStopStatJson(const Node &id, const set<string_view> &stop_stat) {
   return result;
 }
 
+Node GetMapStatJson(const Node &id, const string &map_stat) {
+  Dict result;
+  result["map"s] = map_stat;
+  result["request_id"s] = id;
+  return result;
+}
+
 Node GetTransportCatalogueStats(const RequestHandler &request_handler, const Array &requests) {
   json::Array result;
   result.reserve(requests.size());
@@ -101,6 +110,10 @@ Node GetTransportCatalogueStats(const RequestHandler &request_handler, const Arr
       const auto stops_stat =
           request_handler.GetBusesThroughStop(request_map.at("name"s).AsString());
       result.emplace_back(stops_stat ? GetStopStatJson(id, *stops_stat) : GetErrorJson(id));
+    } else if (request_map.at("type"s) == MAP) {
+      ostringstream buffer;
+      request_handler.RenderMap().Render(buffer);
+      result.emplace_back(GetMapStatJson(id, buffer.str()));
     }
   }
   return result;
@@ -158,15 +171,14 @@ void ProcessJsonRequests(transport_catalogue::TransportCatalogue &transport_cata
                          ostream &output) {
   const auto json_input = Load(input).GetRoot();
   const auto &base_requests = json_input.AsMap().at("base_requests"s).AsArray();
-//  const auto &stat_requests = json_input.AsMap().at("stat_requests"s).AsArray();
+  const auto &stat_requests = json_input.AsMap().at("stat_requests"s).AsArray();
   const auto &render_settings = json_input.AsMap().at("render_settings"s).AsMap();
 
   auto map_settings = GetMapSettings(render_settings);
   auto map_render = renderer::MapRenderer(map_settings);
   RequestHandler request_handler(transport_catalogue, map_render);
   AddTransportCatalogueData(transport_catalogue, base_requests);
-  request_handler.RenderMap().Render(output);
-//  Print(Document(GetTransportCatalogueStats(request_handler, stat_requests)), output);
+  Print(json::Document(GetTransportCatalogueStats(request_handler, stat_requests)), output);
 }
 
 }

@@ -177,8 +177,8 @@ void Document::AddPtr(std::unique_ptr<Object> &&obj) {
 }
 
 void Document::Render(std::ostream &out) const {
-  std::cout << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"sv << std::endl;
-  std::cout << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">"sv << std::endl;
+  out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"sv << std::endl;
+  out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">"sv << std::endl;
   for (const auto &object : objects_) {
     object->Render(out);
   }
@@ -186,57 +186,3 @@ void Document::Render(std::ostream &out) const {
 }
 
 }  // namespace svg
-
-namespace shapes {
-void Triangle::Draw(svg::ObjectContainer &container) const {
-  container
-      .Add(svg::Polyline()
-               .AddPoint(p1_)
-               .AddPoint(p2_)
-               .AddPoint(p3_)
-               .AddPoint(p1_));
-}
-
-void Star::Draw(svg::ObjectContainer &container) const {
-  svg::Polyline polyline;
-  for (int i = 0; i <= num_rays_; ++i) {
-    double angle = 2 * M_PI * (i % num_rays_) / num_rays_;
-    polyline.AddPoint({center_.x + outer_rad_ * sin(angle), center_.y - outer_rad_ * cos(angle)});
-    if (i == num_rays_) {
-      break;
-    }
-    angle += M_PI / num_rays_;
-    polyline.AddPoint({center_.x + inner_rad_ * sin(angle), center_.y - inner_rad_ * cos(angle)});
-  }
-  container.Add(polyline.SetFillColor("red").SetStrokeColor("black"));
-}
-
-void Snowman::Draw(svg::ObjectContainer &container) const {
-  svg::Point center{head_center_.x, head_center_.y};
-  std::vector<svg::Circle> circles(3);
-  double radius{head_radius_};
-  circles[2] = svg::Circle()
-      .SetCenter(center)
-      .SetRadius(radius)
-      .SetFillColor("rgb(240,240,240)")
-      .SetStrokeColor("black");
-  center.y += 2 * head_radius_;
-  radius = 1.5 * head_radius_;
-  circles[1] = svg::Circle()
-      .SetCenter(center)
-      .SetRadius(radius)
-      .SetFillColor("rgb(240,240,240)")
-      .SetStrokeColor("black");
-  center.y += 3 * head_radius_;
-  radius = 2 * head_radius_;
-  circles[0] = svg::Circle()
-      .SetCenter(center)
-      .SetRadius(radius)
-      .SetFillColor("rgb(240,240,240)")
-      .SetStrokeColor("black");
-  for (auto circle : circles) {
-    container.Add(std::move(circle));
-  }
-}
-
-}  // namespace shapes

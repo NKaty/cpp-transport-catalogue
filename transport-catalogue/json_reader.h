@@ -24,6 +24,8 @@ json::Node GetBusStatJson(const json::Node &id,
 
 json::Node GetStopStatJson(const json::Node &id, const std::set<std::string_view> &stop_stat);
 
+json::Node GetMapStatJson(const json::Node &id, const std::string &map_stat);
+
 json::Node GetTransportCatalogueStats(const RequestHandler &request_handler,
                                       const json::Array &requests);
 
