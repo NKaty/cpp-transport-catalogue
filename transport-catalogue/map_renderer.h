@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <optional>
+#include <memory>
 
 namespace renderer {
 
@@ -116,51 +117,47 @@ struct RenderSettings {
   RenderSettings &SetStopLabelFontSize(int stop_label_font_size);
   RenderSettings &SetStopLabelOffset(const svg::Point &stop_label_offset);
 
-  RenderSettings &SetUnderlayerColor(svg::Color underlayer_color);
+  RenderSettings &SetUnderlayerColor(svg::Color &&underlayer_color);
   RenderSettings &SetUnderlayerWidth(double underlayer_width);
 
-  RenderSettings &SetColorPalette(std::vector<svg::Color> color_palette);
+  RenderSettings &SetColorPalette(std::vector<svg::Color> &&color_palette);
 };
 
 class MapRenderer {
  public:
+  using BusVector = std::vector<std::shared_ptr<transport_catalogue::detail::Bus>>;
+  using StopMap = std::unordered_map<std::string_view,
+                                     std::shared_ptr<transport_catalogue::detail::Stop>>;
+
   explicit MapRenderer(RenderSettings &settings);
 
-  [[nodiscard]] svg::Document RenderMap(const std::vector<const transport_catalogue::detail::Bus *> &buses,
-                                        const std::unordered_map<std::string_view,
-                                                                 transport_catalogue::detail::Stop *> &stops) const;
+  [[nodiscard]] svg::Document RenderMap(const BusVector &buses, const StopMap &stops) const;
 
  private:
   RenderSettings &settings_;
 
-  static std::vector<geo::Coordinates> GetStopCoords(const std::unordered_map<std::string_view,
-                                                                              transport_catalogue::detail::Stop *> &stops);
+  static std::vector<geo::Coordinates> GetStopCoords(const StopMap &stops);
 
-  static std::vector<std::string_view> GetStopNames(const std::unordered_map<std::string_view,
-                                                                             transport_catalogue::detail::Stop *> &stops);
+  static std::vector<std::string_view> GetStopNames(const StopMap &stops);
 
   void RenderBusLines(svg::Document &document,
                       const SphereProjector &sphere_projector,
-                      const std::vector<const transport_catalogue::detail::Bus *> &buses,
-                      const std::unordered_map<std::string_view,
-                                               transport_catalogue::detail::Stop *> &stops) const;
+                      const BusVector &buses,
+                      const StopMap &stops) const;
 
   void RenderBusNames(svg::Document &document,
                       const SphereProjector &sphere_projector,
-                      const std::vector<const transport_catalogue::detail::Bus *> &buses,
-                      const std::unordered_map<std::string_view,
-                                               transport_catalogue::detail::Stop *> &stops) const;
+                      const BusVector &buses,
+                      const StopMap &stops) const;
 
   void RenderStopCircles(svg::Document &document,
                          const SphereProjector &sphere_projector,
-                         const std::unordered_map<std::string_view,
-                                                  transport_catalogue::detail::Stop *> &stops,
+                         const StopMap &stops,
                          const std::vector<std::string_view> &stop_names) const;
 
   void RenderStopNames(svg::Document &document,
                        const SphereProjector &sphere_projector,
-                       const std::unordered_map<std::string_view,
-                                                transport_catalogue::detail::Stop *> &stops,
+                       const StopMap &stops,
                        const std::vector<std::string_view> &stop_names) const;
 };
 

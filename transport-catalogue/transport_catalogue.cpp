@@ -12,7 +12,7 @@ using namespace geo;
 
 void TransportCatalogue::AddStop(Stop &&stop) {
   const auto it = stops_list_.insert(stops_list_.begin(), std::move(stop));
-  stops_[it->name] = &(*it);
+  stops_[it->name] = make_shared<Stop>(*it);
 }
 
 void TransportCatalogue::AddBus(Bus &&bus) {
@@ -31,7 +31,7 @@ void TransportCatalogue::AddBus(Bus &&bus) {
   it->geo_route_distance = CalculateGeoRouteDistance(*it);
   it->route_distance = CalculateRouteDistance(*it);
   it->curvature = it->route_distance / it->geo_route_distance;
-  buses_[it->name] = &(*it);
+  buses_[it->name] = make_shared<Bus>(*it);
 }
 
 void TransportCatalogue::AddDistance(const detail::StopsDistance &distance) {
@@ -87,16 +87,16 @@ double TransportCatalogue::CalculateGeoRouteDistance(const Bus &bus) const {
                                           getter);
 }
 
-const set<string_view> *TransportCatalogue::GetBusesThroughStop(string_view stop_name) const {
+unique_ptr<set<string_view>> TransportCatalogue::GetBusesThroughStop(string_view stop_name) const {
   const auto it = stops_.find(stop_name);
   if (it == stops_.end()) {
     return nullptr;
   }
-  return &it->second->buses_through_stop;
+  return make_unique<set<string_view>>(it->second->buses_through_stop);
 }
 
-vector<const Bus *> TransportCatalogue::GetAllBuses() const {
-  vector<const Bus *> buses(buses_.size());
+vector<TransportCatalogue::PtrBus> TransportCatalogue::GetAllBuses() const {
+  vector<PtrBus> buses(buses_.size());
   transform(
       std::execution::par,
       buses_.begin(), buses_.end(),
@@ -114,7 +114,7 @@ vector<const Bus *> TransportCatalogue::GetAllBuses() const {
   return buses;
 }
 
-const unordered_map<string_view, Stop *> &TransportCatalogue::GetAllStops() const {
+const unordered_map<string_view, TransportCatalogue::PtrStop> &TransportCatalogue::GetAllStops() const {
   return stops_;
 }
 

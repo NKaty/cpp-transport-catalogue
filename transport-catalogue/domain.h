@@ -27,8 +27,8 @@ enum class RouteType { CIRCULAR, LINEAR };
 struct Bus {
   std::string name;
   std::vector<std::string_view> stops_on_route;
-  size_t unique_stops_count = 0;
   RouteType route_type;
+  size_t unique_stops_count = 0;
   double geo_route_distance = 0.;
   int route_distance = 0;
   double curvature = 0.;
@@ -41,7 +41,7 @@ struct RouteStat {
   std::string_view bus_name;
   size_t stops_count = 0;
   size_t unique_stops_count = 0;
-  double route_distance = 0.;
+  int route_distance = 0.;
   double curvature = 0.;
 };
 

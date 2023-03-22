@@ -91,7 +91,7 @@ struct RenderContext {
       : out(out), indent_step(indent_step), indent(indent) {
   }
 
-  RenderContext Indented() const {
+  [[nodiscard]] RenderContext Indented() const {
     return {out, indent_step, indent + indent_step};
   }
 

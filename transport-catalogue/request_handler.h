@@ -17,7 +17,7 @@ class RequestHandler {
 
   [[nodiscard]] OptinalRouteStat GetRouteStat(std::string_view bus_name) const;
 
-  [[nodiscard]] const std::set<std::string_view> *GetBusesThroughStop(std::string_view stop_name) const;
+  [[nodiscard]] std::unique_ptr<std::set<std::string_view>> GetBusesThroughStop(std::string_view stop_name) const;
 
   [[nodiscard]] svg::Document RenderMap() const;
 

@@ -46,7 +46,7 @@ void PrintBusInfo(ostream &os, string_view bus_name, const optional<RouteStat> &
   }
 }
 
-void PrintStopInfo(ostream &os, string_view stop_name, const set<string_view> *stop_stat) {
+void PrintStopInfo(ostream &os, string_view stop_name, const unique_ptr<set<string_view>> stop_stat) {
   if (!stop_stat) {
     os << "Stop "s << stop_name << ": not found"s << endl;
   } else if (stop_stat->empty()) {

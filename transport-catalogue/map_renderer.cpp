@@ -12,32 +12,32 @@ using namespace transport_catalogue::detail;
 using namespace svg;
 using namespace geo;
 
-RenderSettings &RenderSettings::SetWidth(double width) {
+RenderSettings &RenderSettings::SetWidth(const double width) {
   this->width = width;
   return *this;
 }
 
-RenderSettings &RenderSettings::SetHeight(double height) {
+RenderSettings &RenderSettings::SetHeight(const double height) {
   this->height = height;
   return *this;
 }
 
-RenderSettings &RenderSettings::SetPadding(double padding) {
+RenderSettings &RenderSettings::SetPadding(const double padding) {
   this->padding = padding;
   return *this;
 }
 
-RenderSettings &RenderSettings::SetLineWidth(double line_width) {
+RenderSettings &RenderSettings::SetLineWidth(const double line_width) {
   this->line_width = line_width;
   return *this;
 }
 
-RenderSettings &RenderSettings::SetStopRadius(double stop_radius) {
+RenderSettings &RenderSettings::SetStopRadius(const double stop_radius) {
   this->stop_radius = stop_radius;
   return *this;
 }
 
-RenderSettings &RenderSettings::SetBusLabelFontSize(int bus_label_font_size) {
+RenderSettings &RenderSettings::SetBusLabelFontSize(const int bus_label_font_size) {
   this->bus_label_font_size = bus_label_font_size;
   return *this;
 }
@@ -47,7 +47,7 @@ RenderSettings &RenderSettings::SetBusLabelOffset(const svg::Point &bus_label_of
   return *this;
 }
 
-RenderSettings &RenderSettings::SetStopLabelFontSize(int stop_label_font_size) {
+RenderSettings &RenderSettings::SetStopLabelFontSize(const int stop_label_font_size) {
   this->stop_label_font_size = stop_label_font_size;
   return *this;
 }
@@ -57,24 +57,24 @@ RenderSettings &RenderSettings::SetStopLabelOffset(const Point &stop_label_offse
   return *this;
 }
 
-RenderSettings &RenderSettings::SetUnderlayerColor(Color underlayer_color) {
+RenderSettings &RenderSettings::SetUnderlayerColor(Color &&underlayer_color) {
   this->underlayer_color = std::move(underlayer_color);
   return *this;
 }
 
-RenderSettings &RenderSettings::SetUnderlayerWidth(double underlayer_width) {
+RenderSettings &RenderSettings::SetUnderlayerWidth(const double underlayer_width) {
   this->underlayer_width = underlayer_width;
   return *this;
 }
 
-RenderSettings &RenderSettings::SetColorPalette(vector<Color> color_palette) {
+RenderSettings &RenderSettings::SetColorPalette(vector<Color> &&color_palette) {
   this->color_palette = std::move(color_palette);
   return *this;
 }
 
 MapRenderer::MapRenderer(RenderSettings &settings) : settings_(settings) {}
 
-vector<Coordinates> MapRenderer::GetStopCoords(const unordered_map<string_view, Stop *> &stops) {
+vector<Coordinates> MapRenderer::GetStopCoords(const unordered_map<string_view, shared_ptr<Stop>> &stops) {
   vector<Coordinates> stop_coords;
   stop_coords.reserve(stops.size());
   for (const auto &[_, stop] : stops) {
@@ -85,7 +85,7 @@ vector<Coordinates> MapRenderer::GetStopCoords(const unordered_map<string_view, 
   return stop_coords;
 }
 
-vector<string_view> MapRenderer::GetStopNames(const unordered_map<string_view, Stop *> &stops) {
+vector<string_view> MapRenderer::GetStopNames(const unordered_map<string_view, shared_ptr<Stop>> &stops) {
   vector<string_view> stop_names(stops.size());
   std::transform(
       execution::par,
@@ -99,8 +99,8 @@ vector<string_view> MapRenderer::GetStopNames(const unordered_map<string_view, S
   return stop_names;
 }
 
-Document MapRenderer::RenderMap(const vector<const Bus *> &buses,
-                                const unordered_map<string_view, Stop *> &stops) const {
+Document MapRenderer::RenderMap(const vector<shared_ptr<Bus>> &buses,
+                                const unordered_map<string_view, shared_ptr<Stop>> &stops) const {
   Document document;
   const auto &stop_names = GetStopNames(stops);
   const auto &stop_coords = GetStopCoords(stops);
@@ -117,8 +117,8 @@ Document MapRenderer::RenderMap(const vector<const Bus *> &buses,
 
 void MapRenderer::RenderBusLines(Document &document,
                                  const SphereProjector &sphere_projector,
-                                 const vector<const Bus *> &buses,
-                                 const unordered_map<string_view, Stop *> &stops) const {
+                                 const vector<shared_ptr<Bus>> &buses,
+                                 const unordered_map<string_view, shared_ptr<Stop>> &stops) const {
   const size_t color_size = settings_.color_palette.size();
   assert(color_size);
   size_t color_index = 0;
@@ -151,8 +151,8 @@ void MapRenderer::RenderBusLines(Document &document,
 
 void MapRenderer::RenderBusNames(Document &document,
                                  const SphereProjector &sphere_projector,
-                                 const vector<const Bus *> &buses,
-                                 const unordered_map<string_view, Stop *> &stops) const {
+                                 const vector<shared_ptr<Bus>> &buses,
+                                 const unordered_map<string_view, shared_ptr<Stop>> &stops) const {
   const size_t color_size = settings_.color_palette.size();
   assert(color_size);
   size_t color_index = 0;
@@ -197,7 +197,7 @@ void MapRenderer::RenderBusNames(Document &document,
 
 void MapRenderer::RenderStopCircles(Document &document,
                                     const SphereProjector &sphere_projector,
-                                    const unordered_map<string_view, Stop *> &stops,
+                                    const unordered_map<string_view, shared_ptr<Stop>> &stops,
                                     const vector<string_view> &stop_names) const {
   for (const auto stop_name : stop_names) {
     const auto stop = stops.at(stop_name);
@@ -212,7 +212,7 @@ void MapRenderer::RenderStopCircles(Document &document,
 
 void MapRenderer::RenderStopNames(Document &document,
                                   const SphereProjector &sphere_projector,
-                                  const unordered_map<string_view, Stop *> &stops,
+                                  const unordered_map<string_view, shared_ptr<Stop>> &stops,
                                   const vector<string_view> &stop_names) const {
   for (const auto stop_name : stop_names) {
     const auto stop = stops.at(stop_name);
