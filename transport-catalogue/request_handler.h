@@ -26,4 +26,8 @@ class RequestHandler {
   const renderer::MapRenderer &renderer_;
 };
 
+void ProcessJsonRequests(transport_catalogue::TransportCatalogue &transport_catalogue,
+                         std::istream &input,
+                         std::ostream &output);
+
 }

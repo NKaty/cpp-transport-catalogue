@@ -12,7 +12,7 @@ using namespace json;
 
 namespace {
 
-void FillTransportCatalogue(TransportCatalogue &tc) {
+void FillTransportCatalogue(JsonReader &json_reader) {
   string input = "[\n"
                  "    {\n"
                  "      \"type\": \"Bus\",\n"
@@ -37,7 +37,7 @@ void FillTransportCatalogue(TransportCatalogue &tc) {
                  "  ]";
   istringstream istream{input};
   const auto json_input = Load(istream).GetRoot();
-  AddTransportCatalogueData(tc, json_input.AsArray());
+  json_reader.AddTransportCatalogueData(json_input.AsArray());
 }
 
 RenderSettings GetSettings() {
@@ -57,12 +57,13 @@ RenderSettings GetSettings() {
                           "    }";
   istringstream istream_settings{input_settings};
   const auto render_settings = Load(istream_settings).GetRoot();
-  return GetMapSettings(render_settings.AsMap());
+  return JsonReader::GetMapSettings(render_settings.AsMap());
 }
 
 void TestRenderMap() {
   TransportCatalogue tc;
-  FillTransportCatalogue(tc);
+  JsonReader json_reader(tc);
+  FillTransportCatalogue(json_reader);
   auto map_settings = GetSettings();
   auto map_render = MapRenderer(map_settings);
   const auto doc = map_render.RenderMap(tc.GetAllBuses(), tc.GetAllStops());

@@ -6,38 +6,58 @@
 #include <iostream>
 #include <set>
 #include <string_view>
+#include <unordered_map>
+#include <memory>
 
 namespace request {
 
-transport_catalogue::detail::Bus ParseBusInput(const json::Dict &request);
+struct Request {
+  int id;
+  std::string type;
+  std::string name;
+};
 
-transport_catalogue::detail::Stop ParseStopInput(const json::Dict &request);
+class JsonReader {
+ public:
+  explicit JsonReader(transport_catalogue::TransportCatalogue &transport_catalogue);
 
-void AddTransportCatalogueData(transport_catalogue::TransportCatalogue &transport_catalogue,
-                               const json::Array &requests);
+  void AddTransportCatalogueData(const json::Array &requests);
 
-json::Node GetErrorJson(const json::Node &id);
+  static json::Node GetBusStatJson(int id,
+                                   const std::optional<transport_catalogue::detail::RouteStat> &route_stat);
 
-json::Node GetBusStatJson(const json::Node &id,
-                          const transport_catalogue::detail::RouteStat &route_stat);
+  static json::Node GetStopStatJson(int id,
+                                    std::unique_ptr<std::set<std::string_view>> &&stops_stat);
 
-json::Node GetStopStatJson(const json::Node &id, const std::set<std::string_view> &stop_stat);
+  static json::Node GetMapStatJson(int id, const std::string &map_stat);
 
-json::Node GetMapStatJson(const json::Node &id, const std::string &map_stat);
+  static std::vector<Request> GetTransportCatalogueRequests(const json::Array &requests);
 
-json::Node GetTransportCatalogueStats(const RequestHandler &request_handler,
-                                      const json::Array &requests);
+  static renderer::RenderSettings GetMapSettings(const json::Dict &request);
 
-renderer::RenderSettings GetMapSettings(const json::Dict &request);
+  inline static const std::string BUS = "Bus"s;
+  inline static const std::string STOP = "Stop"s;
+  inline static const std::string MAP = "Map"s;
 
-svg::Point GetOffset(const json::Array &offset);
+ private:
+  transport_catalogue::TransportCatalogue &transport_catalogue_;
 
-svg::Color GetColor(const json::Node &color);
+  static transport_catalogue::detail::Bus ParseBusInput(const json::Dict &request);
 
-std::vector<svg::Color> GetColorPalette(const json::Array &colors);
+  static transport_catalogue::detail::Stop ParseStopInput(const json::Dict &request);
 
-void ProcessJsonRequests(transport_catalogue::TransportCatalogue &transport_catalogue,
-                         std::istream &input,
-                         std::ostream &output);
+  static json::Node GetErrorJson(int id);
+
+  static json::Node GetBusStatJson(int id,
+                                   const transport_catalogue::detail::RouteStat &route_stat);
+
+  static json::Node GetStopStatJson(int id, const std::set<std::string_view> &stop_stat);
+
+  static svg::Point GetOffset(const json::Array &offset);
+
+  static svg::Color GetColor(const json::Node &color);
+
+  static std::vector<svg::Color> GetColorPalette(const json::Array &colors);
+};
 
 }
