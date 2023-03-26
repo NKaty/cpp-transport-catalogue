@@ -64,9 +64,8 @@ void TestGetRouteStat() {
   TransportCatalogue tc;
   JsonReader json_reader(tc);
   FillTransportCatalogue(json_reader);
-  auto map_settings = GetSettings(json_reader);
-  auto map_render = MapRenderer(map_settings);
-  RequestHandler request_handler(tc, map_render);
+  auto map_render = MapRenderer(GetSettings(json_reader));
+  RequestHandler request_handler(tc, std::move(map_render));
   const auto bus = request_handler.GetRouteStat("114"s);
   ASSERT_EQUAL(bus->bus_name, "114"s);
   ASSERT_EQUAL(bus->stops_count, 3);
@@ -79,9 +78,8 @@ void TestGetBusesThroughStop() {
   TransportCatalogue tc;
   JsonReader json_reader(tc);
   FillTransportCatalogue(json_reader);
-  auto map_settings = GetSettings(json_reader);
-  auto map_render = MapRenderer(map_settings);
-  RequestHandler request_handler(tc, map_render);
+  auto map_render = MapRenderer(GetSettings(json_reader));
+  RequestHandler request_handler(tc, std::move(map_render));
   const auto buses = request_handler.GetBusesThroughStop("Rasskazovka"s);
   set<string_view> rasskazovka_buses{"114"sv};
   ASSERT_EQUAL(*buses, rasskazovka_buses);
@@ -91,9 +89,8 @@ void TestRenderMap() {
   TransportCatalogue tc;
   JsonReader json_reader(tc);
   FillTransportCatalogue(json_reader);
-  auto map_settings = GetSettings(json_reader);
-  auto map_render = MapRenderer(map_settings);
-  RequestHandler request_handler(tc, map_render);
+  auto map_render = MapRenderer(GetSettings(json_reader));
+  RequestHandler request_handler(tc, std::move(map_render));
   auto doc = request_handler.RenderMap();
   stringstream ostream;
   doc.Render(ostream);
@@ -160,7 +157,8 @@ void TestProcessJsonRequests() {
                  "  }";
   istringstream istream{input};
   stringstream ostream;
-  ProcessJsonRequests(tc, istream, ostream);
+  RequestHandler request_handler(tc);
+  request_handler.ProcessJsonRequests(istream, ostream);
   ASSERT_EQUAL(ostream.str(), "[\n"
                               "    {\n"
                               "        \"map\": \"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\" ?>\\n<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" version=\\\"1.1\\\">\\n<polyline points=\\\"100.817,170 30,30 100.817,170\\\" fill=\\\"none\\\" stroke=\\\"green\\\" stroke-width=\\\"14\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\"/>\\n<text x=\\\"100.817\\\" y=\\\"170\\\" dx=\\\"7\\\" dy=\\\"15\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" font-weight=\\\"bold\\\" fill=\\\"rgba(255,255,255,0.85)\\\" stroke=\\\"rgba(255,255,255,0.85)\\\" stroke-width=\\\"3\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\">114</text>\\n<text x=\\\"100.817\\\" y=\\\"170\\\" dx=\\\"7\\\" dy=\\\"15\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" font-weight=\\\"bold\\\" fill=\\\"green\\\">114</text>\\n<text x=\\\"30\\\" y=\\\"30\\\" dx=\\\"7\\\" dy=\\\"15\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" font-weight=\\\"bold\\\" fill=\\\"rgba(255,255,255,0.85)\\\" stroke=\\\"rgba(255,255,255,0.85)\\\" stroke-width=\\\"3\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\">114</text>\\n<text x=\\\"30\\\" y=\\\"30\\\" dx=\\\"7\\\" dy=\\\"15\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" font-weight=\\\"bold\\\" fill=\\\"green\\\">114</text>\\n<circle cx=\\\"100.817\\\" cy=\\\"170\\\" r=\\\"5\\\" fill=\\\"white\\\"/>\\n<circle cx=\\\"30\\\" cy=\\\"30\\\" r=\\\"5\\\" fill=\\\"white\\\"/>\\n<text x=\\\"100.817\\\" y=\\\"170\\\" dx=\\\"7\\\" dy=\\\"-3\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" fill=\\\"rgba(255,255,255,0.85)\\\" stroke=\\\"rgba(255,255,255,0.85)\\\" stroke-width=\\\"3\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\">Морской вокзал</text>\\n<text x=\\\"100.817\\\" y=\\\"170\\\" dx=\\\"7\\\" dy=\\\"-3\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" fill=\\\"black\\\">Морской вокзал</text>\\n<text x=\\\"30\\\" y=\\\"30\\\" dx=\\\"7\\\" dy=\\\"-3\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" fill=\\\"rgba(255,255,255,0.85)\\\" stroke=\\\"rgba(255,255,255,0.85)\\\" stroke-width=\\\"3\\\" stroke-linecap=\\\"round\\\" stroke-linejoin=\\\"round\\\">Ривьерский мост</text>\\n<text x=\\\"30\\\" y=\\\"30\\\" dx=\\\"7\\\" dy=\\\"-3\\\" font-size=\\\"20\\\" font-family=\\\"Verdana\\\" fill=\\\"black\\\">Ривьерский мост</text>\\n</svg>\",\n"

@@ -6,7 +6,8 @@ using namespace std;
 
 int main() {
   transport_catalogue::TransportCatalogue catalogue;
-  request::ProcessJsonRequests(catalogue, cin, cout);
+  request::RequestHandler request_handler(catalogue);
+  request_handler.ProcessJsonRequests(cin, cout);
 
   return 0;
 }

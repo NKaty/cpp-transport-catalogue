@@ -6,7 +6,9 @@
 #include <iostream>
 #include <set>
 #include <string_view>
+#include <string>
 #include <unordered_map>
+#include <map>
 #include <memory>
 
 namespace request {
@@ -17,9 +19,17 @@ struct Request {
   std::string name;
 };
 
+struct ParsedRequests {
+  std::vector<json::Node> base_requests;
+  std::vector<json::Node> stat_requests;
+  std::map<std::string, json::Node> render_settings;
+};
+
 class JsonReader {
  public:
   explicit JsonReader(transport_catalogue::TransportCatalogue &transport_catalogue);
+
+  static ParsedRequests GetParsedRequests(std::istream &input);
 
   void AddTransportCatalogueData(const json::Array &requests);
 

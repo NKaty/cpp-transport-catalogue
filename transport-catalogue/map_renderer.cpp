@@ -72,7 +72,7 @@ RenderSettings &RenderSettings::SetColorPalette(vector<Color> &&color_palette) {
   return *this;
 }
 
-MapRenderer::MapRenderer(RenderSettings &settings) : settings_(settings) {}
+MapRenderer::MapRenderer(RenderSettings &&settings) : settings_(std::move(settings)) {}
 
 vector<Coordinates> MapRenderer::GetStopCoords(const unordered_map<string_view, shared_ptr<Stop>> &stops) {
   vector<Coordinates> stop_coords;
@@ -123,7 +123,7 @@ void MapRenderer::RenderBusLines(Document &document,
   assert(color_size);
   size_t color_index = 0;
 
-  for (const auto bus : buses) {
+  for (const auto &bus : buses) {
     if (!bus->stops_on_route.empty()) {
       Polyline line;
       for (const auto stop_name : bus->stops_on_route) {
@@ -156,7 +156,7 @@ void MapRenderer::RenderBusNames(Document &document,
   const size_t color_size = settings_.color_palette.size();
   assert(color_size);
   size_t color_index = 0;
-  for (const auto bus : buses) {
+  for (const auto &bus : buses) {
     vector<string_view> final_stops;
     final_stops.reserve(2);
     if (!bus->stops_on_route.empty()) {
@@ -200,7 +200,7 @@ void MapRenderer::RenderStopCircles(Document &document,
                                     const unordered_map<string_view, shared_ptr<Stop>> &stops,
                                     const vector<string_view> &stop_names) const {
   for (const auto stop_name : stop_names) {
-    const auto stop = stops.at(stop_name);
+    const auto &stop = stops.at(stop_name);
     if (!stop->buses_through_stop.empty()) {
       document.Add(Circle()
                        .SetCenter(sphere_projector(stop->coordinates))
@@ -215,7 +215,7 @@ void MapRenderer::RenderStopNames(Document &document,
                                   const unordered_map<string_view, shared_ptr<Stop>> &stops,
                                   const vector<string_view> &stop_names) const {
   for (const auto stop_name : stop_names) {
-    const auto stop = stops.at(stop_name);
+    const auto &stop = stops.at(stop_name);
     if (!stop->buses_through_stop.empty()) {
       Point stop_point = sphere_projector(stops.at(stop_name)->coordinates);
       document.Add(Text()

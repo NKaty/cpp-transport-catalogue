@@ -64,8 +64,7 @@ void TestRenderMap() {
   TransportCatalogue tc;
   JsonReader json_reader(tc);
   FillTransportCatalogue(json_reader);
-  auto map_settings = GetSettings();
-  auto map_render = MapRenderer(map_settings);
+  auto map_render = MapRenderer(GetSettings());
   const auto doc = map_render.RenderMap(tc.GetAllBuses(), tc.GetAllStops());
   stringstream ostream;
   doc.Render(ostream);

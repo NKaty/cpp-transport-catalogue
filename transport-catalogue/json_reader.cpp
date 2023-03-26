@@ -14,6 +14,14 @@ using namespace svg;
 JsonReader::JsonReader(transport_catalogue::TransportCatalogue &transport_catalogue)
     : transport_catalogue_(transport_catalogue) {}
 
+ParsedRequests JsonReader::GetParsedRequests(istream &input) {
+  const auto json_input = Load(input).GetRoot();
+  const auto &base_requests = json_input.AsMap().at("base_requests"s).AsArray();
+  const auto &stat_requests = json_input.AsMap().at("stat_requests"s).AsArray();
+  const auto &render_settings = json_input.AsMap().at("render_settings"s).AsMap();
+  return {base_requests, stat_requests, render_settings};
+}
+
 Bus JsonReader::ParseBusInput(const Dict &request) {
   Bus bus;
   bus.name = request.at("name"s).AsString();

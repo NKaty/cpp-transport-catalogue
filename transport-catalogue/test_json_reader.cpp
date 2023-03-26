@@ -43,6 +43,57 @@ void FillTransportCatalogue(TransportCatalogue &tc) {
   json_reader.AddTransportCatalogueData(json_input.AsArray());
 }
 
+void TestGetParsedRequests() {
+  string input = "{\n"
+                 "    \"base_requests\": [\n"
+                 "      {\n"
+                 "        \"type\": \"Bus\",\n"
+                 "        \"name\": \"114\",\n"
+                 "        \"stops\": [\"Морской вокзал\", \"Ривьерский мост\"],\n"
+                 "        \"is_roundtrip\": false\n"
+                 "      },\n"
+                 "      {\n"
+                 "        \"type\": \"Stop\",\n"
+                 "        \"name\": \"Ривьерский мост\",\n"
+                 "        \"latitude\": 43.587795,\n"
+                 "        \"longitude\": 39.716901,\n"
+                 "        \"road_distances\": {\"Морской вокзал\": 850}\n"
+                 "      },\n"
+                 "      {\n"
+                 "        \"type\": \"Stop\",\n"
+                 "        \"name\": \"Морской вокзал\",\n"
+                 "        \"latitude\": 43.581969,\n"
+                 "        \"longitude\": 39.719848,\n"
+                 "        \"road_distances\": {\"Ривьерский мост\": 850}\n"
+                 "      }\n"
+                 "    ],\n"
+                 "    \"render_settings\": {\n"
+                 "      \"width\": 200,\n"
+                 "      \"height\": 200,\n"
+                 "      \"padding\": 30,\n"
+                 "      \"stop_radius\": 5,\n"
+                 "      \"line_width\": 14,\n"
+                 "      \"bus_label_font_size\": 20,\n"
+                 "      \"bus_label_offset\": [7, 15],\n"
+                 "      \"stop_label_font_size\": 20,\n"
+                 "      \"stop_label_offset\": [7, -3],\n"
+                 "      \"underlayer_color\": [255,255,255,0.85],\n"
+                 "      \"underlayer_width\": 3,\n"
+                 "      \"color_palette\": [\"green\", [255,160,0],\"red\"]\n"
+                 "    },\n"
+                 "    \"stat_requests\": [\n"
+                 "      { \"id\": 1, \"type\": \"Map\" },\n"
+                 "      { \"id\": 2, \"type\": \"Stop\", \"name\": \"Ривьерский мост\" },\n"
+                 "      { \"id\": 3, \"type\": \"Bus\", \"name\": \"114\" }\n"
+                 "    ]\n"
+                 "  }";
+  istringstream istream{input};
+  const auto collections = JsonReader::GetParsedRequests(istream);
+  ASSERT_EQUAL(collections.base_requests.size(), 3);
+  ASSERT_EQUAL(collections.stat_requests.size(), 3);
+  ASSERT_EQUAL(collections.render_settings.size(), 12);
+}
+
 void TestAddTransportCatalogueData() {
   TransportCatalogue tc;
   FillTransportCatalogue(tc);
@@ -156,6 +207,7 @@ void TestGetStopStatJson() {
 }
 
 void JsonReaderRunTest() {
+  TestGetParsedRequests();
   TestAddTransportCatalogueData();
   TestGetTransportCatalogueRequests();
   TestGetMapSettings();

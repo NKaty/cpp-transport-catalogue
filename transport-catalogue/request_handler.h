@@ -5,6 +5,7 @@
 
 #include <set>
 #include <string_view>
+#include <optional>
 
 namespace request {
 
@@ -12,8 +13,10 @@ class RequestHandler {
  public:
   using OptinalRouteStat = std::optional<transport_catalogue::detail::RouteStat>;
 
-  RequestHandler(const transport_catalogue::TransportCatalogue &db,
-                 const renderer::MapRenderer &renderer);
+  RequestHandler(transport_catalogue::TransportCatalogue &db,
+                 renderer::MapRenderer &&renderer);
+
+  explicit RequestHandler(transport_catalogue::TransportCatalogue &db);
 
   [[nodiscard]] OptinalRouteStat GetRouteStat(std::string_view bus_name) const;
 
@@ -21,13 +24,12 @@ class RequestHandler {
 
   [[nodiscard]] svg::Document RenderMap() const;
 
- private:
-  const transport_catalogue::TransportCatalogue &db_;
-  const renderer::MapRenderer &renderer_;
-};
+  void ProcessJsonRequests(std::istream &input,
+                           std::ostream &output);
 
-void ProcessJsonRequests(transport_catalogue::TransportCatalogue &transport_catalogue,
-                         std::istream &input,
-                         std::ostream &output);
+ private:
+  transport_catalogue::TransportCatalogue &db_;
+  std::optional<renderer::MapRenderer> renderer_{std::nullopt};
+};
 
 }
