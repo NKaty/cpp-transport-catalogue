@@ -1,4 +1,5 @@
 #include "request_handler.h"
+#include "json_builder.h"
 #include "json.h"
 #include "json_reader.h"
 
@@ -38,21 +39,22 @@ void RequestHandler::ProcessJsonRequests(istream &input, ostream &output) {
   json_reader.AddTransportCatalogueData(request_collections.base_requests);
   const auto parsed_requests =
       JsonReader::GetTransportCatalogueRequests(request_collections.stat_requests);
-  Array stats;
+  Builder json_builder;
+  json_builder.StartArray();
   for (const auto &req : parsed_requests) {
     if (req.type == JsonReader::BUS) {
       const auto route_stat = GetRouteStat(req.name);
-      stats.emplace_back(JsonReader::GetBusStatJson(req.id, route_stat));
+      json_builder.Value(JsonReader::GetBusStatJson(req.id, route_stat));
     } else if (req.type == JsonReader::STOP) {
       auto stops_stat = GetBusesThroughStop(req.name);
-      stats.emplace_back(JsonReader::GetStopStatJson(req.id, std::move(stops_stat)));
+      json_builder.Value(JsonReader::GetStopStatJson(req.id, std::move(stops_stat)));
     } else if (req.type == JsonReader::MAP) {
       ostringstream buffer;
       RenderMap().Render(buffer);
-      stats.emplace_back(JsonReader::GetMapStatJson(req.id, buffer.str()));
+      json_builder.Value(JsonReader::GetMapStatJson(req.id, buffer.str()));
     }
   }
-  Print(json::Document(stats), output);
+  Print(json::Document(json_builder.EndArray().Build()), output);
 }
 
 }

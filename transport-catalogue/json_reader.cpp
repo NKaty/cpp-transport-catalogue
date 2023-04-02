@@ -1,4 +1,5 @@
 #include "json_reader.h"
+#include "json_builder.h"
 
 #include <string>
 #include <vector>
@@ -71,20 +72,24 @@ void JsonReader::AddTransportCatalogueData(const Array &requests) {
 }
 
 Node JsonReader::GetErrorJson(const int id) {
-  Dict result;
-  result["request_id"s] = id;
-  result["error_message"s] = "not found"s;
-  return result;
+  return Builder{}
+      .StartDict()
+      .Key("request_id"s).Value(id)
+      .Key("error_message"s).Value("not found"s)
+      .EndDict()
+      .Build();
 }
 
 Node JsonReader::GetBusStatJson(const int id, const RouteStat &route_stat) {
-  Dict result;
-  result["curvature"s] = route_stat.curvature;
-  result["request_id"s] = id;
-  result["route_length"s] = route_stat.route_distance;
-  result["stop_count"s] = static_cast<int>(route_stat.stops_count);
-  result["unique_stop_count"s] = static_cast<int>(route_stat.unique_stops_count);
-  return result;
+  return Builder{}
+      .StartDict()
+      .Key("curvature"s).Value(route_stat.curvature)
+      .Key("request_id"s).Value(id)
+      .Key("route_length"s).Value(route_stat.route_distance)
+      .Key("stop_count"s).Value(static_cast<int>(route_stat.stops_count))
+      .Key("unique_stop_count"s).Value(static_cast<int>(route_stat.unique_stops_count))
+      .EndDict()
+      .Build();
 }
 
 Node JsonReader::GetBusStatJson(const int id, const optional<RouteStat> &route_stat) {
@@ -94,9 +99,12 @@ Node JsonReader::GetBusStatJson(const int id, const optional<RouteStat> &route_s
 Node JsonReader::GetStopStatJson(const int id, const set<string_view> &stop_stat) {
   Dict result;
   vector<string> stop_stat_{stop_stat.begin(), stop_stat.end()};
-  result["buses"s] = Array{stop_stat_.begin(), stop_stat_.end()};
-  result["request_id"s] = id;
-  return result;
+  return Builder{}
+      .StartDict()
+      .Key("buses"s).Value(Array{stop_stat_.begin(), stop_stat_.end()})
+      .Key("request_id"s).Value(id)
+      .EndDict()
+      .Build();
 }
 
 Node JsonReader::GetStopStatJson(const int id, unique_ptr<set<string_view>> &&stops_stat) {
@@ -104,10 +112,12 @@ Node JsonReader::GetStopStatJson(const int id, unique_ptr<set<string_view>> &&st
 }
 
 Node JsonReader::GetMapStatJson(const int id, const string &map_stat) {
-  Dict result;
-  result["map"s] = map_stat;
-  result["request_id"s] = id;
-  return result;
+  return Builder{}
+      .StartDict()
+      .Key("map"s).Value(map_stat)
+      .Key("request_id"s).Value(id)
+      .EndDict()
+      .Build();
 }
 
 vector<Request> JsonReader::GetTransportCatalogueRequests(const Array &requests) {
