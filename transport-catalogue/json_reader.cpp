@@ -11,6 +11,7 @@ namespace request {
 using namespace json;
 using namespace transport_catalogue::detail;
 using namespace svg;
+using namespace routing;
 
 JsonReader::JsonReader(transport_catalogue::TransportCatalogue &transport_catalogue)
     : transport_catalogue_(transport_catalogue) {}
@@ -20,7 +21,8 @@ ParsedRequests JsonReader::GetParsedRequests(istream &input) {
   const auto &base_requests = json_input.AsMap().at("base_requests"s).AsArray();
   const auto &stat_requests = json_input.AsMap().at("stat_requests"s).AsArray();
   const auto &render_settings = json_input.AsMap().at("render_settings"s).AsMap();
-  return {base_requests, stat_requests, render_settings};
+  const auto &routing_settings = json_input.AsMap().at("routing_settings"s).AsMap();
+  return {base_requests, stat_requests, render_settings, routing_settings};
 }
 
 Bus JsonReader::ParseBusInput(const Dict &request) {
@@ -71,7 +73,7 @@ void JsonReader::AddTransportCatalogueData(const Array &requests) {
   }
 }
 
-Node JsonReader::GetErrorJson(const int id) {
+Node JsonReader::GetErrorJson(int id) {
   return Builder{}
       .StartDict()
       .Key("request_id"s).Value(id)
@@ -80,7 +82,7 @@ Node JsonReader::GetErrorJson(const int id) {
       .Build();
 }
 
-Node JsonReader::GetBusStatJson(const int id, const RouteStat &route_stat) {
+Node JsonReader::GetBusStatJson(int id, const RouteStat &route_stat) {
   return Builder{}
       .StartDict()
       .Key("curvature"s).Value(route_stat.curvature)
@@ -92,11 +94,11 @@ Node JsonReader::GetBusStatJson(const int id, const RouteStat &route_stat) {
       .Build();
 }
 
-Node JsonReader::GetBusStatJson(const int id, const optional<RouteStat> &route_stat) {
+Node JsonReader::GetBusStatJson(int id, const optional<RouteStat> &route_stat) {
   return route_stat ? GetBusStatJson(id, *route_stat) : GetErrorJson(id);
 }
 
-Node JsonReader::GetStopStatJson(const int id, const set<string_view> &stop_stat) {
+Node JsonReader::GetStopStatJson(int id, const set<string_view> &stop_stat) {
   Dict result;
   vector<string> stop_stat_{stop_stat.begin(), stop_stat.end()};
   return Builder{}
@@ -107,17 +109,62 @@ Node JsonReader::GetStopStatJson(const int id, const set<string_view> &stop_stat
       .Build();
 }
 
-Node JsonReader::GetStopStatJson(const int id, unique_ptr<set<string_view>> &&stops_stat) {
+Node JsonReader::GetStopStatJson(int id, unique_ptr<set<string_view>> &&stops_stat) {
   return stops_stat ? GetStopStatJson(id, *stops_stat) : GetErrorJson(id);
 }
 
-Node JsonReader::GetMapStatJson(const int id, const string &map_stat) {
+Node JsonReader::GetMapStatJson(int id, const string &map_stat) {
   return Builder{}
       .StartDict()
       .Key("map"s).Value(map_stat)
       .Key("request_id"s).Value(id)
       .EndDict()
       .Build();
+}
+
+struct RouteItemJson {
+  Builder &json_builder;
+  void operator()(const WaitRouteItem &route_item) const {
+    json_builder
+        .StartDict()
+        .Key("stop_name"s).Value(route_item.stop)
+        .Key("time"s).Value(route_item.time)
+        .Key("type"s).Value(route_item.type)
+        .EndDict();
+  }
+  void operator()(const BusRouteItem &route_item) const {
+    json_builder
+        .StartDict()
+        .Key("bus").Value(route_item.bus)
+        .Key("span_count"s).Value(route_item.span_count)
+        .Key("time"s).Value(route_item.time)
+        .Key("type"s).Value(route_item.type)
+        .EndDict();
+  }
+};
+
+Node JsonReader::GetRouteItems(const vector<RouteItem> &route_items) {
+  Builder json_builder;
+  json_builder.StartArray();
+  for (const auto &item : route_items) {
+    visit(RouteItemJson{json_builder}, item);
+  }
+  json_builder.EndArray();
+  return json_builder.Build();
+}
+
+Node JsonReader::GetRouteStatJson(int id, const RouteData &route_info) {
+  return Builder{}
+      .StartDict()
+      .Key("request_id"s).Value(id)
+      .Key("total_time"s).Value(route_info.total_time)
+      .Key("items"s).Value(GetRouteItems(route_info.items))
+      .EndDict()
+      .Build();
+}
+
+Node JsonReader::GetRouteStatJson(int id, const optional<RouteData> &route_info) {
+  return route_info ? GetRouteStatJson(id, *route_info) : GetErrorJson(id);
 }
 
 vector<Request> JsonReader::GetTransportCatalogueRequests(const Array &requests) {
@@ -130,6 +177,12 @@ vector<Request> JsonReader::GetTransportCatalogueRequests(const Array &requests)
     req.type = request_map.at("type"s).AsString();
     if (request_map.find("name"s) != request_map.end()) {
       req.name = request_map.at("name"s).AsString();
+    }
+    if (request_map.find("from"s) != request_map.end()) {
+      req.from = request_map.at("from"s).AsString();
+    }
+    if (request_map.find("to"s) != request_map.end()) {
+      req.to = request_map.at("to"s).AsString();
     }
     result.push_back(req);
   }
@@ -181,6 +234,11 @@ renderer::RenderSettings JsonReader::GetMapSettings(const Dict &request) {
       .SetUnderlayerWidth(request.at("underlayer_width"s).AsDouble())
       .SetColorPalette(GetColorPalette(request.at("color_palette"s).AsArray()));
   return settings;
+}
+
+RoutingSettings JsonReader::GetRoutingSettings(const Dict &requests) {
+  return {KmPerHour(requests.at("bus_velocity"s).AsDouble()),
+          requests.at("bus_wait_time"s).AsInt()};
 }
 
 }

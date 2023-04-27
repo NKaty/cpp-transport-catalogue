@@ -33,6 +33,7 @@ void AddLinearBus(TransportCatalogue &tc) {
   tc.AddStop({"Marushkino"s, marushkino_coords});
   tc.AddStop({"Rasskazovka"s, rasskazovka_coords});
   tc.AddDistance({"Tolstopaltsevo"s, "Marushkino", 3900});
+  tc.AddDistance({"Marushkino"s, "Tolstopaltsevo", 3700});
   tc.AddDistance({"Marushkino"s, "Rasskazovka", 9900});
   tc.AddDistance({"Marushkino"s, "Marushkino", 100});
   vector<string_view> stops{"Tolstopaltsevo"sv, "Marushkino"sv, "Marushkino"sv, "Rasskazovka"sv};
@@ -239,8 +240,17 @@ void TestGetRouteStatForLinearBus() {
   ASSERT_EQUAL(bus->bus_name, "750"s);
   ASSERT_EQUAL(bus->stops_count, 7);
   ASSERT_EQUAL(bus->unique_stops_count, 3);
-  ASSERT_EQUAL(bus->route_distance, 27800);
-  ASSERT(abs(bus->curvature - 1.32764) < 1e-5);
+  ASSERT_EQUAL(bus->route_distance, 27600);
+  ASSERT(abs(bus->curvature - 1.31808) < 1e-5);
+}
+
+void TestGetDistanceBetweenStops() {
+  TransportCatalogue tc;
+  AddLinearBus(tc);
+  ASSERT_EQUAL(tc.GetDistanceBetweenStops("Tolstopaltsevo"sv, "Marushkino"sv).value(), 3900);
+  ASSERT_EQUAL(tc.GetDistanceBetweenStops("Marushkino"sv, "Tolstopaltsevo"sv).value(), 3700);
+  ASSERT_EQUAL(tc.GetDistanceBetweenStops("Marushkino"sv, "Marushkino"sv).value(), 100);
+  ASSERT(!tc.GetDistanceBetweenStops("Tolstopaltsevo"sv, "Tolstopaltsevo"sv).has_value());
 }
 
 void TransportCatalogueRunTest() {
@@ -252,6 +262,7 @@ void TransportCatalogueRunTest() {
   TestGetAllStops();
   TestGetRouteStatForCircularBus();
   TestGetRouteStatForLinearBus();
+  TestGetDistanceBetweenStops();
 }
 
 }

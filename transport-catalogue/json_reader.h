@@ -2,6 +2,7 @@
 
 #include "json.h"
 #include "request_handler.h"
+#include "json_builder.h"
 
 #include <iostream>
 #include <set>
@@ -17,12 +18,15 @@ struct Request {
   int id;
   std::string type;
   std::string name;
+  std::string from;
+  std::string to;
 };
 
 struct ParsedRequests {
   std::vector<json::Node> base_requests;
   std::vector<json::Node> stat_requests;
   std::map<std::string, json::Node> render_settings;
+  std::map<std::string, json::Node> routing_settings;
 };
 
 class JsonReader {
@@ -45,9 +49,14 @@ class JsonReader {
 
   static renderer::RenderSettings GetMapSettings(const json::Dict &request);
 
+  static routing::RoutingSettings GetRoutingSettings(const json::Dict &requests);
+
+  static json::Node GetRouteStatJson(int id, const std::optional<routing::RouteData> &route_info);
+
   inline static const std::string BUS = "Bus"s;
   inline static const std::string STOP = "Stop"s;
   inline static const std::string MAP = "Map"s;
+  inline static const std::string ROUTE = "Route"s;
 
  private:
   transport_catalogue::TransportCatalogue &transport_catalogue_;
@@ -62,6 +71,10 @@ class JsonReader {
                                    const transport_catalogue::detail::RouteStat &route_stat);
 
   static json::Node GetStopStatJson(int id, const std::set<std::string_view> &stop_stat);
+
+  static json::Node GetRouteItems(const std::vector<routing::RouteItem> &route_items);
+
+  static json::Node GetRouteStatJson(int id, const routing::RouteData &route_info);
 
   static svg::Point GetOffset(const json::Array &offset);
 

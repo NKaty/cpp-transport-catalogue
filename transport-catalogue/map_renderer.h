@@ -129,7 +129,7 @@ class MapRenderer {
   using StopMap = std::unordered_map<std::string_view,
                                      std::shared_ptr<transport_catalogue::detail::Stop>>;
 
-  explicit MapRenderer(RenderSettings &&settings);
+  explicit MapRenderer(RenderSettings settings);
 
   [[nodiscard]] svg::Document RenderMap(const BusVector &buses, const StopMap &stops) const;
 

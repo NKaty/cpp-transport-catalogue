@@ -118,4 +118,17 @@ const unordered_map<string_view, TransportCatalogue::PtrStop> &TransportCatalogu
   return stops_;
 }
 
+optional<int> TransportCatalogue::GetDistanceBetweenStops(string_view stop_from,
+                                                          string_view stop_to) const {
+  auto it = distances_between_stops_.find({stops_.at(stop_from), stops_.at(stop_to)});
+  if (it != distances_between_stops_.end()) {
+    return it->second;
+  }
+  it = distances_between_stops_.find({stops_.at(stop_to), stops_.at(stop_from)});
+  if (it != distances_between_stops_.end()) {
+    return it->second;
+  }
+  return nullopt;
+}
+
 }

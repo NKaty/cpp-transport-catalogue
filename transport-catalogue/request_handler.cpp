@@ -12,10 +12,7 @@ namespace request {
 using namespace json;
 using namespace renderer;
 using namespace transport_catalogue;
-
-RequestHandler::RequestHandler(transport_catalogue::TransportCatalogue &db,
-                               renderer::MapRenderer &&renderer)
-    : db_(db), renderer_(std::move(renderer)) {}
+using namespace routing;
 
 RequestHandler::RequestHandler(transport_catalogue::TransportCatalogue &db)
     : db_(db) {}
@@ -28,14 +25,27 @@ RequestHandler::RequestHandler(transport_catalogue::TransportCatalogue &db)
   return db_.GetBusesThroughStop(stop_name);
 }
 
-svg::Document RequestHandler::RenderMap() const {
+svg::Document RequestHandler::RenderMap(RenderSettings render_settings) const {
+  if (!renderer_.has_value()) {
+    renderer_.emplace(MapRenderer(std::move(render_settings)));
+  }
   return renderer_->RenderMap(db_.GetAllBuses(), db_.GetAllStops());
+}
+
+optional<RouteData> RequestHandler::BuildRoute(RoutingSettings routing_settings,
+                                               string_view from,
+                                               string_view to) const {
+  if (!router_.has_value()) {
+    router_.emplace(TransportRouter(db_, routing_settings));
+  }
+  return router_->BuildRoute(from, to);
 }
 
 void RequestHandler::ProcessJsonRequests(istream &input, ostream &output) {
   const auto request_collections = JsonReader::GetParsedRequests(input);
   JsonReader json_reader(db_);
-  renderer_ = MapRenderer(JsonReader::GetMapSettings(request_collections.render_settings));
+  auto render_settings = JsonReader::GetMapSettings(request_collections.render_settings);
+  auto routing_settings = JsonReader::GetRoutingSettings(request_collections.routing_settings);
   json_reader.AddTransportCatalogueData(request_collections.base_requests);
   const auto parsed_requests =
       JsonReader::GetTransportCatalogueRequests(request_collections.stat_requests);
@@ -50,8 +60,11 @@ void RequestHandler::ProcessJsonRequests(istream &input, ostream &output) {
       json_builder.Value(JsonReader::GetStopStatJson(req.id, std::move(stops_stat)));
     } else if (req.type == JsonReader::MAP) {
       ostringstream buffer;
-      RenderMap().Render(buffer);
+      RenderMap(render_settings).Render(buffer);
       json_builder.Value(JsonReader::GetMapStatJson(req.id, buffer.str()));
+    } else if (req.type == JsonReader::ROUTE) {
+      auto route = BuildRoute(routing_settings, req.from, req.to);
+      json_builder.Value(JsonReader::GetRouteStatJson(req.id, route));
     }
   }
   Print(json::Document(json_builder.EndArray().Build()), output);

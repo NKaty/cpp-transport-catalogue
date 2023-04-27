@@ -72,7 +72,7 @@ RenderSettings &RenderSettings::SetColorPalette(vector<Color> &&color_palette) {
   return *this;
 }
 
-MapRenderer::MapRenderer(RenderSettings &&settings) : settings_(std::move(settings)) {}
+MapRenderer::MapRenderer(RenderSettings settings) : settings_(std::move(settings)) {}
 
 vector<Coordinates> MapRenderer::GetStopCoords(const unordered_map<string_view, shared_ptr<Stop>> &stops) {
   vector<Coordinates> stop_coords;

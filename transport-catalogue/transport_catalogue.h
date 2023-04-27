@@ -38,6 +38,9 @@ class TransportCatalogue {
 
   [[nodiscard]] const std::unordered_map<std::string_view, PtrStop> &GetAllStops() const;
 
+  [[nodiscard]] std::optional<int> GetDistanceBetweenStops(std::string_view stop_from,
+                                                           std::string_view stop_to) const;
+
  private:
   std::deque<detail::Stop> stops_list_;
   std::deque<detail::Bus> buses_list_;

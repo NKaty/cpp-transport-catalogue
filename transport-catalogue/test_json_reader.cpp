@@ -11,6 +11,7 @@ using namespace detail;
 using namespace request;
 using namespace json;
 using namespace svg;
+using namespace routing;
 
 namespace {
 
@@ -45,52 +46,136 @@ void FillTransportCatalogue(TransportCatalogue &tc) {
 
 void TestGetParsedRequests() {
   string input = "{\n"
-                 "    \"base_requests\": [\n"
-                 "      {\n"
-                 "        \"type\": \"Bus\",\n"
-                 "        \"name\": \"114\",\n"
-                 "        \"stops\": [\"Морской вокзал\", \"Ривьерский мост\"],\n"
-                 "        \"is_roundtrip\": false\n"
+                 "      \"base_requests\": [\n"
+                 "          {\n"
+                 "              \"is_roundtrip\": true,\n"
+                 "              \"name\": \"297\",\n"
+                 "              \"stops\": [\n"
+                 "                  \"Biryulyovo Zapadnoye\",\n"
+                 "                  \"Biryulyovo Tovarnaya\",\n"
+                 "                  \"Universam\",\n"
+                 "                  \"Biryulyovo Zapadnoye\"\n"
+                 "              ],\n"
+                 "              \"type\": \"Bus\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"is_roundtrip\": false,\n"
+                 "              \"name\": \"635\",\n"
+                 "              \"stops\": [\n"
+                 "                  \"Biryulyovo Tovarnaya\",\n"
+                 "                  \"Universam\",\n"
+                 "                  \"Prazhskaya\"\n"
+                 "              ],\n"
+                 "              \"type\": \"Bus\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"latitude\": 55.574371,\n"
+                 "              \"longitude\": 37.6517,\n"
+                 "              \"name\": \"Biryulyovo Zapadnoye\",\n"
+                 "              \"road_distances\": {\n"
+                 "                  \"Biryulyovo Tovarnaya\": 2600\n"
+                 "              },\n"
+                 "              \"type\": \"Stop\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"latitude\": 55.587655,\n"
+                 "              \"longitude\": 37.645687,\n"
+                 "              \"name\": \"Universam\",\n"
+                 "              \"road_distances\": {\n"
+                 "                  \"Biryulyovo Tovarnaya\": 1380,\n"
+                 "                  \"Biryulyovo Zapadnoye\": 2500,\n"
+                 "                  \"Prazhskaya\": 4650\n"
+                 "              },\n"
+                 "              \"type\": \"Stop\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"latitude\": 55.592028,\n"
+                 "              \"longitude\": 37.653656,\n"
+                 "              \"name\": \"Biryulyovo Tovarnaya\",\n"
+                 "              \"road_distances\": {\n"
+                 "                  \"Universam\": 890\n"
+                 "              },\n"
+                 "              \"type\": \"Stop\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"latitude\": 55.611717,\n"
+                 "              \"longitude\": 37.603938,\n"
+                 "              \"name\": \"Prazhskaya\",\n"
+                 "              \"road_distances\": {},\n"
+                 "              \"type\": \"Stop\"\n"
+                 "          }\n"
+                 "      ],\n"
+                 "      \"render_settings\": {\n"
+                 "          \"bus_label_font_size\": 20,\n"
+                 "          \"bus_label_offset\": [\n"
+                 "              7,\n"
+                 "              15\n"
+                 "          ],\n"
+                 "          \"color_palette\": [\n"
+                 "              \"green\",\n"
+                 "              [\n"
+                 "                  255,\n"
+                 "                  160,\n"
+                 "                  0\n"
+                 "              ],\n"
+                 "              \"red\"\n"
+                 "          ],\n"
+                 "          \"height\": 200,\n"
+                 "          \"line_width\": 14,\n"
+                 "          \"padding\": 30,\n"
+                 "          \"stop_label_font_size\": 20,\n"
+                 "          \"stop_label_offset\": [\n"
+                 "              7,\n"
+                 "              -3\n"
+                 "          ],\n"
+                 "          \"stop_radius\": 5,\n"
+                 "          \"underlayer_color\": [\n"
+                 "              255,\n"
+                 "              255,\n"
+                 "              255,\n"
+                 "              0.85\n"
+                 "          ],\n"
+                 "          \"underlayer_width\": 3,\n"
+                 "          \"width\": 200\n"
                  "      },\n"
-                 "      {\n"
-                 "        \"type\": \"Stop\",\n"
-                 "        \"name\": \"Ривьерский мост\",\n"
-                 "        \"latitude\": 43.587795,\n"
-                 "        \"longitude\": 39.716901,\n"
-                 "        \"road_distances\": {\"Морской вокзал\": 850}\n"
+                 "      \"routing_settings\": {\n"
+                 "          \"bus_velocity\": 40,\n"
+                 "          \"bus_wait_time\": 6\n"
                  "      },\n"
-                 "      {\n"
-                 "        \"type\": \"Stop\",\n"
-                 "        \"name\": \"Морской вокзал\",\n"
-                 "        \"latitude\": 43.581969,\n"
-                 "        \"longitude\": 39.719848,\n"
-                 "        \"road_distances\": {\"Ривьерский мост\": 850}\n"
-                 "      }\n"
-                 "    ],\n"
-                 "    \"render_settings\": {\n"
-                 "      \"width\": 200,\n"
-                 "      \"height\": 200,\n"
-                 "      \"padding\": 30,\n"
-                 "      \"stop_radius\": 5,\n"
-                 "      \"line_width\": 14,\n"
-                 "      \"bus_label_font_size\": 20,\n"
-                 "      \"bus_label_offset\": [7, 15],\n"
-                 "      \"stop_label_font_size\": 20,\n"
-                 "      \"stop_label_offset\": [7, -3],\n"
-                 "      \"underlayer_color\": [255,255,255,0.85],\n"
-                 "      \"underlayer_width\": 3,\n"
-                 "      \"color_palette\": [\"green\", [255,160,0],\"red\"]\n"
-                 "    },\n"
-                 "    \"stat_requests\": [\n"
-                 "      { \"id\": 1, \"type\": \"Map\" },\n"
-                 "      { \"id\": 2, \"type\": \"Stop\", \"name\": \"Ривьерский мост\" },\n"
-                 "      { \"id\": 3, \"type\": \"Bus\", \"name\": \"114\" }\n"
-                 "    ]\n"
+                 "      \"stat_requests\": [\n"
+                 "          {\n"
+                 "              \"id\": 1,\n"
+                 "              \"name\": \"297\",\n"
+                 "              \"type\": \"Bus\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"id\": 2,\n"
+                 "              \"name\": \"635\",\n"
+                 "              \"type\": \"Bus\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"id\": 3,\n"
+                 "              \"name\": \"Universam\",\n"
+                 "              \"type\": \"Stop\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"from\": \"Biryulyovo Zapadnoye\",\n"
+                 "              \"id\": 4,\n"
+                 "              \"to\": \"Universam\",\n"
+                 "              \"type\": \"Route\"\n"
+                 "          },\n"
+                 "          {\n"
+                 "              \"from\": \"Biryulyovo Zapadnoye\",\n"
+                 "              \"id\": 5,\n"
+                 "              \"to\": \"Prazhskaya\",\n"
+                 "              \"type\": \"Route\"\n"
+                 "          }\n"
+                 "      ]\n"
                  "  }";
   istringstream istream{input};
   const auto collections = JsonReader::GetParsedRequests(istream);
-  ASSERT_EQUAL(collections.base_requests.size(), 3);
-  ASSERT_EQUAL(collections.stat_requests.size(), 3);
+  ASSERT_EQUAL(collections.base_requests.size(), 6);
+  ASSERT_EQUAL(collections.stat_requests.size(), 5);
   ASSERT_EQUAL(collections.render_settings.size(), 12);
 }
 
@@ -123,7 +208,13 @@ void TestGetTransportCatalogueRequests() {
   string input_stat_requests = "[\n"
                                "      { \"id\": 1, \"type\": \"Map\" },\n"
                                "      { \"id\": 2, \"type\": \"Stop\", \"name\": \"Ривьерский мост\" },\n"
-                               "      { \"id\": 3, \"type\": \"Bus\", \"name\": \"114\" }\n"
+                               "      { \"id\": 3, \"type\": \"Bus\", \"name\": \"114\" },\n"
+                               "      {\n"
+                               "            \"from\": \"Biryulyovo Zapadnoye\",\n"
+                               "            \"id\": 4,\n"
+                               "            \"to\": \"Universam\",\n"
+                               "            \"type\": \"Route\"\n"
+                               "       }\n"
                                "    ]";
   istringstream istream_stat_requests{input_stat_requests};
   const auto stat_requests = Load(istream_stat_requests).GetRoot();
@@ -136,6 +227,10 @@ void TestGetTransportCatalogueRequests() {
   ASSERT_EQUAL(requests[2].id, 3);
   ASSERT_EQUAL(requests[2].type, "Bus"s);
   ASSERT_EQUAL(requests[2].name, "114"s);
+  ASSERT_EQUAL(requests[3].type, "Route"s);
+  ASSERT_EQUAL(requests[3].id, 4);
+  ASSERT_EQUAL(requests[3].to, "Universam"s);
+  ASSERT_EQUAL(requests[3].from, "Biryulyovo Zapadnoye"s);
 }
 
 void TestGetMapSettings() {
@@ -206,6 +301,35 @@ void TestGetStopStatJson() {
   ASSERT_EQUAL(stat.AsMap().at("buses"s).AsArray()[0].AsString(), "114"s);
 }
 
+void TestGetRoutingSettings() {
+  TransportCatalogue tc;
+  string input_settings = "{\n"
+                          "  \"bus_velocity\": 60,\n"
+                          "  \"bus_wait_time\": 6\n"
+                          "}";
+  istringstream istream_settings{input_settings};
+  const auto routing_settings = Load(istream_settings).GetRoot();
+  auto map_settings = JsonReader::GetRoutingSettings(routing_settings.AsMap());
+  ASSERT_EQUAL(map_settings.bus_velocity, 1000);
+  ASSERT_EQUAL(map_settings.bus_wait_time, 6);
+}
+
+void TestGetRouteStatJson() {
+  TransportCatalogue tc;
+  FillTransportCatalogue(tc);
+  TransportRouter tr(tc, RoutingSettings(KmPerHour(60), 2));
+  const auto route = JsonReader::GetRouteStatJson(10, tr.BuildRoute("Rasskazovka"sv, "Biryulyovo Zapadnoye"sv));
+  ASSERT_EQUAL(route.AsMap().at("request_id"s).AsInt(), 10);
+  ASSERT_EQUAL(route.AsMap().at("total_time"s).AsDouble(), 2.85);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("type"s).AsString(), "Wait"s);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("stop_name"s).AsString(), "Rasskazovka"s);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("time"s).AsDouble(), 2);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("type"s).AsString(), "Bus"s);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("bus"s).AsString(), "114"s);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("span_count"s).AsInt(), 1);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("time"s).AsDouble(), 0.85);
+}
+
 void JsonReaderRunTest() {
   TestGetParsedRequests();
   TestAddTransportCatalogueData();
@@ -214,6 +338,8 @@ void JsonReaderRunTest() {
   TestGetMapStatJson();
   TestGetBusStatJson();
   TestGetStopStatJson();
+  TestGetRoutingSettings();
+  TestGetRouteStatJson();
 }
 
 }
