@@ -40,7 +40,7 @@ void AddCircularAndLinearBuses(TransportCatalogue &tc) {
 void TestBuildRoute() {
   TransportCatalogue tc;
   AddCircularAndLinearBuses(tc);
-  TransportRouter tr(tc, RoutingSettings{KmPerHour(30), 2});
+  TransportRouter tr(tc, RoutingSettings{30, 2});
   {
     auto route = tr.BuildRoute("Tolstopaltsevo"sv, "Marushkino"sv);
     ASSERT_EQUAL(route->total_time, 9.8);

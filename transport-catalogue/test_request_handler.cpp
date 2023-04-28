@@ -114,7 +114,7 @@ void TestBuildRoute() {
   JsonReader json_reader(tc);
   FillTransportCatalogue(json_reader);
   RequestHandler request_handler(tc);
-  auto route = request_handler.BuildRoute(RoutingSettings{KmPerHour(30), 2},
+  auto route = request_handler.BuildRoute(RoutingSettings{30, 2},
                              "Rasskazovka"s,
                              "Biryulyovo Zapadnoye"s);
   ASSERT_EQUAL(route->total_time, 3.7);
@@ -314,7 +314,7 @@ void TestProcessJsonRequests() {
                               "                \"type\": \"Bus\"\n"
                               "            },\n"
                               "            {\n"
-                              "                \"stop_name\": \"Biryulyovo Zapadnoye\",\n"
+                              "                \"stop_name\": \"Biryulyovo Tovarnaya\",\n"
                               "                \"time\": 6,\n"
                               "                \"type\": \"Wait\"\n"
                               "            },\n"

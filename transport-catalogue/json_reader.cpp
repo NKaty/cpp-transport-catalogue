@@ -237,7 +237,7 @@ renderer::RenderSettings JsonReader::GetMapSettings(const Dict &request) {
 }
 
 RoutingSettings JsonReader::GetRoutingSettings(const Dict &requests) {
-  return {KmPerHour(requests.at("bus_velocity"s).AsDouble()),
+  return {requests.at("bus_velocity"s).AsDouble(),
           requests.at("bus_wait_time"s).AsInt()};
 }
 

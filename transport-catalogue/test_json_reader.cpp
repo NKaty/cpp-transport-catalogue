@@ -317,7 +317,7 @@ void TestGetRoutingSettings() {
 void TestGetRouteStatJson() {
   TransportCatalogue tc;
   FillTransportCatalogue(tc);
-  TransportRouter tr(tc, RoutingSettings(KmPerHour(60), 2));
+  TransportRouter tr(tc, RoutingSettings(60, 2));
   const auto route = JsonReader::GetRouteStatJson(10, tr.BuildRoute("Rasskazovka"sv, "Biryulyovo Zapadnoye"sv));
   ASSERT_EQUAL(route.AsMap().at("request_id"s).AsInt(), 10);
   ASSERT_EQUAL(route.AsMap().at("total_time"s).AsDouble(), 2.85);

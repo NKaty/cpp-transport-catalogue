@@ -15,27 +15,14 @@
 
 namespace routing {
 
-#define DECLARE_DOUBLE_PARAM(Name) \
-  struct Name {                    \
-    double value;                  \
-    explicit Name(double v)        \
-        : value(v) {               \
-    }                              \
-    operator double() const {      \
-        return value;              \
-    }                              \
-  }
-
-DECLARE_DOUBLE_PARAM(MeterPerMinute);
-DECLARE_DOUBLE_PARAM(KmPerHour);
+const int MINUTES_IN_HOUR = 60;
+const int METERS_IN_KM = 1000;
 
 struct RoutingSettings {
-  MeterPerMinute bus_velocity{0.};
+  double bus_velocity{0.};
   int bus_wait_time{0};
-  RoutingSettings(MeterPerMinute bus_velocity, int bus_wait_time)
-      : bus_velocity(bus_velocity), bus_wait_time(bus_wait_time) {}
-  RoutingSettings(KmPerHour bus_velocity, int bus_wait_time)
-      : bus_velocity(1000. * bus_velocity / 60.), bus_wait_time(bus_wait_time) {}
+  RoutingSettings(double bus_velocity, int bus_wait_time)
+      : bus_velocity(METERS_IN_KM * bus_velocity / MINUTES_IN_HOUR), bus_wait_time(bus_wait_time) {}
 };
 
 struct WaitRouteItem {
