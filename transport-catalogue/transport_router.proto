@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package proto_tc;
+
+import "graph.proto";
+
+message RoutingSettings {
+    double bus_velocity = 1;
+    uint32 bus_wait_time = 2;
+}
+
+message BusRouteItem {
+    double time = 1;
+    string bus = 2;
+    uint32 span_count = 3;
+    uint32 stop_from = 4;
+}
+
+message StopVertex {
+    uint32 stop = 1;
+    uint32 vertex = 2;
+}
+
+message TransportRouter {
+    RoutingSettings routing_settings = 1;
+    repeated StopVertex vertexes = 2;
+    repeated BusRouteItem edges= 3;
+    Graph graph = 4;
+}

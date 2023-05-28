@@ -78,15 +78,11 @@ void TestRenderDocument() {
                               "</svg>");
 }
 
+}
+
 void SvgRunTest() {
   TestDrawCircle();
   TestDrawPolyline();
   TestDrawText();
   TestRenderDocument();
 }
-
-}
-
-//int main() {
-//  SvgRunTest();
-//}

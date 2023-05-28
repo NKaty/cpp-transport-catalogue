@@ -6,21 +6,28 @@ using namespace std;
 
 namespace routing {
 
+using namespace graph;
 using namespace transport_catalogue;
 using namespace transport_catalogue::detail;
 
 TransportRouter::TransportRouter(const TransportCatalogue &catalogue, RoutingSettings settings)
     : catalogue_(catalogue), settings_(settings), graph_(BuildGraph()), router_(*graph_) {}
 
-unique_ptr<TransportRouter::Graph> TransportRouter::BuildGraph() {
-  const auto buses = catalogue_.GetAllBuses();
-  Graph graph(accumulate(
-      buses.begin(),
-      buses.end(),
-      0,
-      [](auto acc, const auto &bus) { return acc + bus->unique_stops_count; }));
+TransportRouter::TransportRouter(const TransportCatalogue &catalogue,
+                                 RoutingSettings settings,
+                                 Graph graph,
+                                 Vertexes router_vertexes,
+                                 Edges router_edges)
+    : catalogue_(catalogue),
+      settings_(settings),
+      graph_(std::make_unique<Graph>(std::move(graph))),
+      vertexes_(std::move(router_vertexes)),
+      edges_(std::move(router_edges)),
+      router_(*graph_) {}
 
-  for (const auto &bus : buses) {
+unique_ptr<TransportRouter::Graph> TransportRouter::BuildGraph() {
+  Graph graph(catalogue_.GetAllStops().size());
+  for (const auto &bus : catalogue_.GetAllBuses()) {
     const int stop_count = static_cast<int>(bus->stops_on_route.size());
     for (int i_fwd = 0, i_bwd = stop_count - 1; i_fwd < stop_count; ++i_fwd, --i_bwd) {
       double weight_fwd = 0., weight_bwd = 0.;
@@ -87,6 +94,26 @@ optional<RouteData> TransportRouter::BuildRoute(string_view from, string_view to
     return route_data;
   }
 
+  return nullopt;
+}
+
+const RoutingSettings &TransportRouter::GetRoutingSettings() const {
+  return settings_;
+}
+
+const TransportRouter::Graph &TransportRouter::GetGraph() const {
+  return *graph_;
+}
+
+const pair<BusRouteItem, string_view> &TransportRouter::GetEdge(EdgeId edge_id) const {
+  return edges_.at(edge_id);
+}
+
+optional<graph::VertexId> TransportRouter::GetVertexIdByStopName(string_view stop_name) const {
+  const auto it = vertexes_.find(stop_name);
+  if (it != vertexes_.end()) {
+    return vertexes_.at(stop_name);
+  }
   return nullopt;
 }
 

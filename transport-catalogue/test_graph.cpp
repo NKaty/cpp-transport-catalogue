@@ -46,7 +46,7 @@ void TestGetVertexCount() {
 void TestGetIncidentEdges() {
   DirectedWeightedGraph<int> graph(3);
   {
-    const auto edges= graph.GetIncidentEdges(1);
+    const auto edges = graph.GetIncidentEdges(1);
     ASSERT_EQUAL(edges.end() - edges.begin(), 0);
   }
   {
@@ -59,15 +59,11 @@ void TestGetIncidentEdges() {
   }
 }
 
+}
+
 void GraphRunTest() {
   TestAddGetEdge();
   TestGetEdgeCount();
   TestGetVertexCount();
   TestGetIncidentEdges();
 }
-
-}
-
-//int main() {
-//  GraphRunTest();
-//}

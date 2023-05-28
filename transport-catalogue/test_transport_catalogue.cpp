@@ -222,6 +222,13 @@ void TestGetAllStops() {
   ASSERT(stops.count("Universam"s));
 }
 
+void TestGetAllDistances() {
+  TransportCatalogue tc;
+  AddCircularAndLinearBuses(tc);
+  auto distances = tc.GetAllDistances();
+  ASSERT_EQUAL(distances.size(), 6);
+}
+
 void TestGetRouteStatForCircularBus() {
   TransportCatalogue tc;
   AddCircularBus(tc);
@@ -253,6 +260,8 @@ void TestGetDistanceBetweenStops() {
   ASSERT(!tc.GetDistanceBetweenStops("Tolstopaltsevo"sv, "Tolstopaltsevo"sv).has_value());
 }
 
+}
+
 void TransportCatalogueRunTest() {
   TestAddStop();
   TestAddCircularBus();
@@ -260,13 +269,8 @@ void TransportCatalogueRunTest() {
   TestGetBusesThroughStop();
   TestGetAllBuses();
   TestGetAllStops();
+  TestGetAllDistances();
   TestGetRouteStatForCircularBus();
   TestGetRouteStatForLinearBus();
   TestGetDistanceBetweenStops();
 }
-
-}
-
-//int main() {
-//  TransportCatalogueRunTest();
-//}

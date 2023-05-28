@@ -245,6 +245,8 @@ void Benchmark() {
   cout << chrono::duration_cast<std::chrono::milliseconds>(duration).count() << "ms"sv << endl;
 }
 
+}
+
 void JsonRunTest() {
   TestNull();
   TestNumbers();
@@ -255,9 +257,3 @@ void JsonRunTest() {
   TestErrorHandling();
   Benchmark();
 }
-
-}
-
-//int main() {
-//  JsonRunTest();
-//}

@@ -54,12 +54,8 @@ void TestParseStatRequests() {
                "Stop Biryulyovo Zapadnoye: buses 256 828\n");
 }
 
+}
+
 void StatReaderRunTest() {
   TestParseStatRequests();
 }
-
-}
-
-//int main() {
-//  StatReaderRunTest();
-//}

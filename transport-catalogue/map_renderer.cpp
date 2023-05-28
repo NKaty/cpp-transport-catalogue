@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <sstream>
-#include <execution>
 
 using namespace std;
 
@@ -17,9 +16,17 @@ RenderSettings &RenderSettings::SetWidth(const double width) {
   return *this;
 }
 
+double RenderSettings::GetWidth() const {
+  return width;
+}
+
 RenderSettings &RenderSettings::SetHeight(const double height) {
   this->height = height;
   return *this;
+}
+
+double RenderSettings::GetHeight() const {
+  return height;
 }
 
 RenderSettings &RenderSettings::SetPadding(const double padding) {
@@ -27,9 +34,17 @@ RenderSettings &RenderSettings::SetPadding(const double padding) {
   return *this;
 }
 
+double RenderSettings::GetPadding() const {
+  return padding;
+}
+
 RenderSettings &RenderSettings::SetLineWidth(const double line_width) {
   this->line_width = line_width;
   return *this;
+}
+
+double RenderSettings::GetLineWidth() const {
+  return line_width;
 }
 
 RenderSettings &RenderSettings::SetStopRadius(const double stop_radius) {
@@ -37,9 +52,16 @@ RenderSettings &RenderSettings::SetStopRadius(const double stop_radius) {
   return *this;
 }
 
+double RenderSettings::GetStopRadius() const {
+  return stop_radius;
+}
+
 RenderSettings &RenderSettings::SetBusLabelFontSize(const int bus_label_font_size) {
   this->bus_label_font_size = bus_label_font_size;
   return *this;
+}
+int RenderSettings::GetBusLabelFontSize() const {
+  return bus_label_font_size;
 }
 
 RenderSettings &RenderSettings::SetBusLabelOffset(const svg::Point &bus_label_offset) {
@@ -47,9 +69,17 @@ RenderSettings &RenderSettings::SetBusLabelOffset(const svg::Point &bus_label_of
   return *this;
 }
 
+const svg::Point &RenderSettings::GetBusLabelOffset() const {
+  return bus_label_offset;
+}
+
 RenderSettings &RenderSettings::SetStopLabelFontSize(const int stop_label_font_size) {
   this->stop_label_font_size = stop_label_font_size;
   return *this;
+}
+
+int RenderSettings::GetStopLabelFontSize() const {
+  return stop_label_font_size;
 }
 
 RenderSettings &RenderSettings::SetStopLabelOffset(const Point &stop_label_offset) {
@@ -57,9 +87,17 @@ RenderSettings &RenderSettings::SetStopLabelOffset(const Point &stop_label_offse
   return *this;
 }
 
+const svg::Point &RenderSettings::GetStopLabelOffset() const {
+  return stop_label_offset;
+}
+
 RenderSettings &RenderSettings::SetUnderlayerColor(Color &&underlayer_color) {
   this->underlayer_color = std::move(underlayer_color);
   return *this;
+}
+
+const svg::Color &RenderSettings::GetUnderlayerColor() const {
+  return underlayer_color;
 }
 
 RenderSettings &RenderSettings::SetUnderlayerWidth(const double underlayer_width) {
@@ -67,9 +105,17 @@ RenderSettings &RenderSettings::SetUnderlayerWidth(const double underlayer_width
   return *this;
 }
 
+double RenderSettings::GetUnderlayerWidth() const {
+  return underlayer_width;
+}
+
 RenderSettings &RenderSettings::SetColorPalette(vector<Color> &&color_palette) {
   this->color_palette = std::move(color_palette);
   return *this;
+}
+
+const std::vector<svg::Color> &RenderSettings::GetColorPalette() const {
+  return color_palette;
 }
 
 MapRenderer::MapRenderer(RenderSettings settings) : settings_(std::move(settings)) {}
@@ -86,17 +132,7 @@ vector<Coordinates> MapRenderer::GetStopCoords(const unordered_map<string_view, 
 }
 
 vector<string_view> MapRenderer::GetStopNames(const unordered_map<string_view, shared_ptr<Stop>> &stops) {
-  vector<string_view> stop_names(stops.size());
-  std::transform(
-      execution::par,
-      stops.begin(),
-      stops.end(),
-      stop_names.begin(),
-      [](const auto &item) {
-        return item.first;
-      });
-  std::sort(execution::par, stop_names.begin(), stop_names.end());
-  return stop_names;
+  return GetSortedUnorderedMapKeys(stops);
 }
 
 Document MapRenderer::RenderMap(const vector<shared_ptr<Bus>> &buses,

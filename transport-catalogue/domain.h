@@ -5,10 +5,14 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <unordered_map>
+#include <algorithm>
+//#include <execution>
 
 using namespace std::string_literals;
 
 namespace transport_catalogue::detail {
+
 struct PairHash {
   template<typename T>
   size_t operator()(const std::pair<T, T> &p) const {
@@ -66,4 +70,24 @@ std::ostream &operator<<(std::ostream &os, const std::set<Value> &collection) {
   }
   return os;
 }
+
+template<typename Key, typename Value>
+std::vector<Key> GetSortedUnorderedMapKeys(const std::unordered_map<Key, Value> &container) {
+  std::vector<Key> keys(container.size());
+  std::transform(
+//      std::execution::par,
+      container.begin(),
+      container.end(),
+      keys.begin(),
+      [](const auto &item) {
+        return item.first;
+      });
+  std::sort(
+//      std::execution::par,
+      keys.begin(),
+      keys.end()
+  );
+  return keys;
+}
+
 }

@@ -1,6 +1,5 @@
 #include "transport_catalogue.h"
 
-#include <iostream>
 #include <algorithm>
 
 using namespace std;
@@ -98,7 +97,7 @@ unique_ptr<set<string_view>> TransportCatalogue::GetBusesThroughStop(string_view
 vector<TransportCatalogue::PtrBus> TransportCatalogue::GetAllBuses() const {
   vector<PtrBus> buses(buses_.size());
   transform(
-      std::execution::par,
+//      std::execution::par,
       buses_.begin(), buses_.end(),
       buses.begin(),
       [](const auto &item) {
@@ -106,7 +105,7 @@ vector<TransportCatalogue::PtrBus> TransportCatalogue::GetAllBuses() const {
       });
 
   sort(
-      execution::par,
+//      execution::par,
       buses.begin(), buses.end(),
       [](auto lhs, auto rhs) {
         return lhs->name < rhs->name;
@@ -116,6 +115,10 @@ vector<TransportCatalogue::PtrBus> TransportCatalogue::GetAllBuses() const {
 
 const unordered_map<string_view, TransportCatalogue::PtrStop> &TransportCatalogue::GetAllStops() const {
   return stops_;
+}
+
+const TransportCatalogue::DistanceStore &TransportCatalogue::GetAllDistances() const {
+  return distances_between_stops_;
 }
 
 optional<int> TransportCatalogue::GetDistanceBetweenStops(string_view stop_from,

@@ -25,13 +25,9 @@ void TestAsRange() {
   }
 }
 
+}
+
 void RangesRunTest() {
   TestBeginEnd();
   TestAsRange();
 }
-
-}
-
-//int main() {
-//  RangesRunTest();
-//}

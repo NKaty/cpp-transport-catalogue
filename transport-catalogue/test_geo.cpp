@@ -13,12 +13,8 @@ void TestComputeDistance() {
   ASSERT(abs(ComputeDistance(from, to) - 1693.0) < 1e-3);
 }
 
+}
+
 void GeoRunTest() {
   TestComputeDistance();
 }
-
-}
-
-//int main() {
-//  GeoRunTest();
-//}

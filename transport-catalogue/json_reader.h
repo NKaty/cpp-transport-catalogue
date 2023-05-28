@@ -3,6 +3,7 @@
 #include "json.h"
 #include "request_handler.h"
 #include "json_builder.h"
+#include "serialization.h"
 
 #include <iostream>
 #include <set>
@@ -22,18 +23,35 @@ struct Request {
   std::string to;
 };
 
-struct ParsedRequests {
+//struct ParsedRequests {
+//  std::vector<json::Node> base_requests;
+//  std::vector<json::Node> stat_requests;
+//  std::map<std::string, json::Node> render_settings;
+//  std::map<std::string, json::Node> routing_settings;
+//  std::map<std::string, json::Node> serialization_settings;
+//};
+
+struct ParsedBaseRequests {
   std::vector<json::Node> base_requests;
-  std::vector<json::Node> stat_requests;
   std::map<std::string, json::Node> render_settings;
   std::map<std::string, json::Node> routing_settings;
+  std::map<std::string, json::Node> serialization_settings;
+};
+
+struct ParsedStatRequests {
+  std::vector<json::Node> stat_requests;
+  std::map<std::string, json::Node> serialization_settings;
 };
 
 class JsonReader {
  public:
   explicit JsonReader(transport_catalogue::TransportCatalogue &transport_catalogue);
 
-  static ParsedRequests GetParsedRequests(std::istream &input);
+//  static ParsedRequests GetParsedRequests(std::istream &input);
+
+  static ParsedBaseRequests GetParsedBaseRequests(std::istream &input);
+
+  static ParsedStatRequests GetParsedStatRequests(std::istream &input);
 
   void AddTransportCatalogueData(const json::Array &requests);
 
@@ -50,6 +68,8 @@ class JsonReader {
   static renderer::RenderSettings GetMapSettings(const json::Dict &request);
 
   static routing::RoutingSettings GetRoutingSettings(const json::Dict &requests);
+
+  static serialization::SerializationSettings GetSerializationSettings(const json::Dict &requests);
 
   static json::Node GetRouteStatJson(int id, const std::optional<routing::RouteData> &route_info);
 

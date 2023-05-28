@@ -4,6 +4,7 @@
 #include "json_reader.h"
 
 #include <sstream>
+#include <fstream>
 
 using namespace std;
 
@@ -13,8 +14,9 @@ using namespace json;
 using namespace renderer;
 using namespace transport_catalogue;
 using namespace routing;
+using namespace serialization;
 
-RequestHandler::RequestHandler(transport_catalogue::TransportCatalogue &db)
+RequestHandler::RequestHandler(TransportCatalogue &db)
     : db_(db) {}
 
 [[nodiscard]] RequestHandler::OptinalRouteStat RequestHandler::GetRouteStat(string_view bus_name) const {
@@ -41,14 +43,25 @@ optional<RouteData> RequestHandler::BuildRoute(RoutingSettings routing_settings,
   return router_->BuildRoute(from, to);
 }
 
-void RequestHandler::ProcessJsonRequests(istream &input, ostream &output) {
-  const auto request_collections = JsonReader::GetParsedRequests(input);
+void RequestHandler::ProcessMakeBaseRequest(istream &input) {
+  const auto request_collections = JsonReader::GetParsedBaseRequests(input);
   JsonReader json_reader(db_);
+  auto serialization_settings =
+      JsonReader::GetSerializationSettings(request_collections.serialization_settings);
   auto render_settings = JsonReader::GetMapSettings(request_collections.render_settings);
   auto routing_settings = JsonReader::GetRoutingSettings(request_collections.routing_settings);
   json_reader.AddTransportCatalogueData(request_collections.base_requests);
+  Serialize(serialization_settings, db_, render_settings, TransportRouter(db_, routing_settings));
+}
+
+void RequestHandler::ProcessRequests(istream &input, ostream &output) {
+  const auto request_collections = JsonReader::GetParsedStatRequests(input);
+  auto serialization_settings =
+      JsonReader::GetSerializationSettings(request_collections.serialization_settings);
   const auto parsed_requests =
       JsonReader::GetTransportCatalogueRequests(request_collections.stat_requests);
+  auto [render_settings, router] = Deserialize(serialization_settings, db_);
+  router_.emplace(std::move(router));
   Builder json_builder;
   json_builder.StartArray();
   for (const auto &req : parsed_requests) {
@@ -63,7 +76,7 @@ void RequestHandler::ProcessJsonRequests(istream &input, ostream &output) {
       RenderMap(render_settings).Render(buffer);
       json_builder.Value(JsonReader::GetMapStatJson(req.id, buffer.str()));
     } else if (req.type == JsonReader::ROUTE) {
-      auto route = BuildRoute(routing_settings, req.from, req.to);
+      auto route = BuildRoute(router_->GetRoutingSettings(), req.from, req.to);
       json_builder.Value(JsonReader::GetRouteStatJson(req.id, route));
     }
   }

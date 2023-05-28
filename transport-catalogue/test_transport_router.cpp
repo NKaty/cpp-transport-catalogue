@@ -86,12 +86,55 @@ void TestBuildRoute() {
   }
 }
 
+void TestGetRoutingSettings() {
+  TransportCatalogue tc;
+  AddCircularAndLinearBuses(tc);
+  TransportRouter tr(tc, RoutingSettings{30, 2});
+  const auto settings = tr.GetRoutingSettings();
+  ASSERT_EQUAL(settings.bus_velocity, 500);
+  ASSERT_EQUAL(settings.bus_wait_time, 2);
+}
+
+void TestGetGraph() {
+  TransportCatalogue tc;
+  AddCircularAndLinearBuses(tc);
+  TransportRouter tr(tc, RoutingSettings{30, 2});
+  const auto &graph = tr.GetGraph();
+  ASSERT_EQUAL(graph.GetVertexCount(), 5);
+}
+
+void TestGetEdge() {
+  TransportCatalogue tc;
+  AddCircularAndLinearBuses(tc);
+  TransportRouter tr(tc, RoutingSettings{30, 2});
+  const auto &edge0 = tr.GetEdge(0);
+  ASSERT_EQUAL(edge0.first.time, 7.8);
+  ASSERT_EQUAL(edge0.first.bus, "750"sv);
+  ASSERT_EQUAL(edge0.first.span_count, 1);
+  ASSERT_EQUAL(edge0.second, "Tolstopaltsevo"sv);
+  const auto &edge10 = tr.GetEdge(10);
+  ASSERT_EQUAL(edge10.first.time, 19.8);
+  ASSERT_EQUAL(edge10.first.bus, "750"sv);
+  ASSERT_EQUAL(edge10.first.span_count, 1);
+  ASSERT_EQUAL(edge10.second, "Marushkino"sv);
+}
+
+void TestGetVertexIdByStopName() {
+  TransportCatalogue tc;
+  AddCircularAndLinearBuses(tc);
+  TransportRouter tr(tc, RoutingSettings{30, 2});
+  const auto &graph = tr.GetGraph();
+  ASSERT_EQUAL(tr.GetVertexIdByStopName("Biryulyovo"sv).value(), 3);
+  ASSERT_EQUAL(tr.GetVertexIdByStopName("Marushkino"sv).value(), 1);
+  ASSERT(!tr.GetVertexIdByStopName("Marush"sv).has_value());
+}
+
+}
+
 void TransportRouterRunTest() {
   TestBuildRoute();
+  TestGetRoutingSettings();
+  TestGetGraph();
+  TestGetEdge();
+  TestGetVertexIdByStopName();
 }
-
-}
-
-//int main() {
-//  TransportRouterRunTest();
-//}

@@ -21,6 +21,7 @@ const int METERS_IN_KM = 1000;
 struct RoutingSettings {
   double bus_velocity{0.};
   int bus_wait_time{0};
+  RoutingSettings() = default;
   RoutingSettings(double bus_velocity, int bus_wait_time)
       : bus_velocity(METERS_IN_KM * bus_velocity / MINUTES_IN_HOUR), bus_wait_time(bus_wait_time) {}
 };
@@ -54,18 +55,35 @@ class TransportRouter {
  public:
   using Graph = graph::DirectedWeightedGraph<double>;
   using Router = graph::Router<double>;
+  using Vertexes = std::unordered_map<std::string_view, graph::VertexId>;
+  using Edges = std::unordered_map<graph::EdgeId, std::pair<BusRouteItem, std::string_view>>;
 
   TransportRouter(const transport_catalogue::TransportCatalogue &catalogue,
                   RoutingSettings settings);
 
+  TransportRouter(const transport_catalogue::TransportCatalogue &catalogue,
+                  RoutingSettings settings,
+                  Graph graph,
+                  Vertexes router_vertexes,
+                  Edges router_edges);
+
   [[nodiscard]] std::optional<RouteData> BuildRoute(std::string_view from,
                                                     std::string_view to) const;
+
+  [[nodiscard]] const RoutingSettings &GetRoutingSettings() const;
+
+  [[nodiscard]] const Graph &GetGraph() const;
+
+  [[nodiscard]] const std::pair<BusRouteItem,
+                                std::string_view> &GetEdge(graph::EdgeId edge_id) const;
+
+  [[nodiscard]] std::optional<graph::VertexId> GetVertexIdByStopName(std::string_view stop_name) const;
 
  private:
   const transport_catalogue::TransportCatalogue &catalogue_;
   RoutingSettings settings_;
-  std::unordered_map<std::string_view, graph::VertexId> vertexes_;
-  std::unordered_map<graph::EdgeId, std::pair<BusRouteItem, std::string_view>> edges_;
+  Vertexes vertexes_;
+  Edges edges_;
   std::unique_ptr<Graph> graph_;
   Router router_;
 

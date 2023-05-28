@@ -4,7 +4,6 @@
 #include <sstream>
 
 using namespace std;
-
 using namespace json;
 
 namespace {
@@ -142,13 +141,9 @@ void TestThrowErrors() {
   }
 }
 
+}
+
 void JsonBuilderRunTest() {
   TestBuildJson();
   TestThrowErrors();
 }
-
-}
-
-//int main() {
-//  JsonBuilderRunTest();
-//}

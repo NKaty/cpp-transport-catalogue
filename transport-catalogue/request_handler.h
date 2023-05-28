@@ -26,8 +26,9 @@ class RequestHandler {
                                                std::string_view from,
                                                std::string_view to) const;
 
-  void ProcessJsonRequests(std::istream &input,
-                           std::ostream &output);
+  void ProcessMakeBaseRequest(std::istream &input);
+
+  void ProcessRequests(std::istream &input, std::ostream &output);
 
  private:
   transport_catalogue::TransportCatalogue &db_;

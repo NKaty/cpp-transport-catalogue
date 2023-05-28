@@ -104,23 +104,35 @@ struct RenderSettings {
   std::vector<svg::Color> color_palette;
 
   RenderSettings &SetWidth(double width);
+  [[nodiscard]] double GetWidth() const;
   RenderSettings &SetHeight(double height);
+  [[nodiscard]] double GetHeight() const;
 
   RenderSettings &SetPadding(double padding);
+  [[nodiscard]] double GetPadding() const;
 
   RenderSettings &SetLineWidth(double line_width);
+  [[nodiscard]] double GetLineWidth() const;
   RenderSettings &SetStopRadius(double stop_radius);
+  [[nodiscard]] double GetStopRadius() const;
 
   RenderSettings &SetBusLabelFontSize(int bus_label_font_size);
+  [[nodiscard]] int GetBusLabelFontSize() const;
   RenderSettings &SetBusLabelOffset(const svg::Point &bus_label_offset);
+  [[nodiscard]] const svg::Point &GetBusLabelOffset() const;
 
   RenderSettings &SetStopLabelFontSize(int stop_label_font_size);
+  [[nodiscard]] int GetStopLabelFontSize() const;
   RenderSettings &SetStopLabelOffset(const svg::Point &stop_label_offset);
+  [[nodiscard]] const svg::Point &GetStopLabelOffset() const;
 
   RenderSettings &SetUnderlayerColor(svg::Color &&underlayer_color);
+  [[nodiscard]] const svg::Color &GetUnderlayerColor() const;
   RenderSettings &SetUnderlayerWidth(double underlayer_width);
+  [[nodiscard]] double GetUnderlayerWidth() const;
 
   RenderSettings &SetColorPalette(std::vector<svg::Color> &&color_palette);
+  [[nodiscard]] const std::vector<svg::Color> &GetColorPalette() const;
 };
 
 class MapRenderer {

@@ -12,17 +12,25 @@ using namespace json;
 using namespace transport_catalogue::detail;
 using namespace svg;
 using namespace routing;
+using namespace serialization;
 
 JsonReader::JsonReader(transport_catalogue::TransportCatalogue &transport_catalogue)
     : transport_catalogue_(transport_catalogue) {}
 
-ParsedRequests JsonReader::GetParsedRequests(istream &input) {
+ParsedBaseRequests JsonReader::GetParsedBaseRequests(istream &input) {
   const auto json_input = Load(input).GetRoot();
   const auto &base_requests = json_input.AsMap().at("base_requests"s).AsArray();
-  const auto &stat_requests = json_input.AsMap().at("stat_requests"s).AsArray();
   const auto &render_settings = json_input.AsMap().at("render_settings"s).AsMap();
   const auto &routing_settings = json_input.AsMap().at("routing_settings"s).AsMap();
-  return {base_requests, stat_requests, render_settings, routing_settings};
+  const auto &serialization_settings = json_input.AsMap().at("serialization_settings"s).AsMap();
+  return {base_requests, render_settings, routing_settings, serialization_settings};
+}
+
+ParsedStatRequests JsonReader::GetParsedStatRequests(istream &input) {
+  const auto json_input = Load(input).GetRoot();
+  const auto &stat_requests = json_input.AsMap().at("stat_requests"s).AsArray();
+  const auto &serialization_settings = json_input.AsMap().at("serialization_settings"s).AsMap();
+  return {stat_requests, serialization_settings};
 }
 
 Bus JsonReader::ParseBusInput(const Dict &request) {
@@ -210,7 +218,7 @@ Color JsonReader::GetColor(const Node &color) {
 vector<Color> JsonReader::GetColorPalette(const Array &colors) {
   vector<Color> color_palette(colors.size());
   std::transform(
-      execution::par,
+//      execution::par,
       colors.begin(), colors.end(),
       color_palette.begin(),
       [&](const Node &node) {
@@ -239,6 +247,10 @@ renderer::RenderSettings JsonReader::GetMapSettings(const Dict &request) {
 RoutingSettings JsonReader::GetRoutingSettings(const Dict &requests) {
   return {requests.at("bus_velocity"s).AsDouble(),
           requests.at("bus_wait_time"s).AsInt()};
+}
+
+SerializationSettings JsonReader::GetSerializationSettings(const Dict &requests) {
+  return {requests.at("file"s).AsString()};
 }
 
 }

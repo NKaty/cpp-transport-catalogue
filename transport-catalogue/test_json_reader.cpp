@@ -44,8 +44,11 @@ void FillTransportCatalogue(TransportCatalogue &tc) {
   json_reader.AddTransportCatalogueData(json_input.AsArray());
 }
 
-void TestGetParsedRequests() {
+void TestGetParsedBaseRequests() {
   string input = "{\n"
+                 "      \"serialization_settings\": {\n"
+                 "          \"file\": \"transport_catalogue.db\"\n"
+                 "      },"
                  "      \"base_requests\": [\n"
                  "          {\n"
                  "              \"is_roundtrip\": true,\n"
@@ -141,7 +144,21 @@ void TestGetParsedRequests() {
                  "      \"routing_settings\": {\n"
                  "          \"bus_velocity\": 40,\n"
                  "          \"bus_wait_time\": 6\n"
-                 "      },\n"
+                 "      }\n"
+                 "  }";
+  istringstream istream{input};
+  const auto collections = JsonReader::GetParsedBaseRequests(istream);
+  ASSERT_EQUAL(collections.base_requests.size(), 6);
+  ASSERT_EQUAL(collections.serialization_settings.size(), 1);
+  ASSERT_EQUAL(collections.routing_settings.size(), 2);
+  ASSERT_EQUAL(collections.render_settings.size(), 12);
+}
+
+void TestGetParsedStatRequests() {
+  string input = "{\n"
+                 "      \"serialization_settings\": {\n"
+                 "          \"file\": \"transport_catalogue.db\"\n"
+                 "      },"
                  "      \"stat_requests\": [\n"
                  "          {\n"
                  "              \"id\": 1,\n"
@@ -173,10 +190,9 @@ void TestGetParsedRequests() {
                  "      ]\n"
                  "  }";
   istringstream istream{input};
-  const auto collections = JsonReader::GetParsedRequests(istream);
-  ASSERT_EQUAL(collections.base_requests.size(), 6);
+  const auto collections = JsonReader::GetParsedStatRequests(istream);
   ASSERT_EQUAL(collections.stat_requests.size(), 5);
-  ASSERT_EQUAL(collections.render_settings.size(), 12);
+  ASSERT_EQUAL(collections.serialization_settings.size(), 1);
 }
 
 void TestAddTransportCatalogueData() {
@@ -318,11 +334,13 @@ void TestGetRouteStatJson() {
   TransportCatalogue tc;
   FillTransportCatalogue(tc);
   TransportRouter tr(tc, RoutingSettings(60, 2));
-  const auto route = JsonReader::GetRouteStatJson(10, tr.BuildRoute("Rasskazovka"sv, "Biryulyovo Zapadnoye"sv));
+  const auto route =
+      JsonReader::GetRouteStatJson(10, tr.BuildRoute("Rasskazovka"sv, "Biryulyovo Zapadnoye"sv));
   ASSERT_EQUAL(route.AsMap().at("request_id"s).AsInt(), 10);
   ASSERT_EQUAL(route.AsMap().at("total_time"s).AsDouble(), 2.85);
   ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("type"s).AsString(), "Wait"s);
-  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("stop_name"s).AsString(), "Rasskazovka"s);
+  ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("stop_name"s).AsString(),
+               "Rasskazovka"s);
   ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[0].AsMap().at("time"s).AsDouble(), 2);
   ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("type"s).AsString(), "Bus"s);
   ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("bus"s).AsString(), "114"s);
@@ -330,8 +348,11 @@ void TestGetRouteStatJson() {
   ASSERT_EQUAL(route.AsMap().at("items"s).AsArray()[1].AsMap().at("time"s).AsDouble(), 0.85);
 }
 
+}
+
 void JsonReaderRunTest() {
-  TestGetParsedRequests();
+  TestGetParsedBaseRequests();
+  TestGetParsedStatRequests();
   TestAddTransportCatalogueData();
   TestGetTransportCatalogueRequests();
   TestGetMapSettings();
@@ -341,9 +362,3 @@ void JsonReaderRunTest() {
   TestGetRoutingSettings();
   TestGetRouteStatJson();
 }
-
-}
-
-//int main() {
-//  JsonReaderRunTest();
-//}

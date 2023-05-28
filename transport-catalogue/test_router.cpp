@@ -46,12 +46,8 @@ void TestBuildRoute() {
   }
 }
 
+}
+
 void RouterRunTest() {
   TestBuildRoute();
 }
-
-}
-
-//int main() {
-//  RouterRunTest();
-//}

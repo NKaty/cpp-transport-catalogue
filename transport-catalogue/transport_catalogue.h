@@ -9,7 +9,8 @@
 #include <deque>
 #include <optional>
 #include <functional>
-#include <execution>
+//#include <execution>
+#include <numeric>
 #include <memory>
 
 using namespace std::string_literals;
@@ -20,6 +21,8 @@ class TransportCatalogue {
  public:
   using PtrStop = std::shared_ptr<detail::Stop>;
   using PtrBus = std::shared_ptr<detail::Bus>;
+  using DistanceStore = std::unordered_map<std::pair<PtrStop, PtrStop>, int, detail::PairHash>;
+
   void AddStop(detail::Stop &&stop);
 
   void AddBus(detail::Bus &&bus);
@@ -38,6 +41,8 @@ class TransportCatalogue {
 
   [[nodiscard]] const std::unordered_map<std::string_view, PtrStop> &GetAllStops() const;
 
+  [[nodiscard]] const DistanceStore &GetAllDistances() const;
+
   [[nodiscard]] std::optional<int> GetDistanceBetweenStops(std::string_view stop_from,
                                                            std::string_view stop_to) const;
 
@@ -46,7 +51,7 @@ class TransportCatalogue {
   std::deque<detail::Bus> buses_list_;
   std::unordered_map<std::string_view, PtrStop> stops_;
   std::unordered_map<std::string_view, PtrBus> buses_;
-  std::unordered_map<std::pair<PtrStop, PtrStop>, int, detail::PairHash> distances_between_stops_;
+  DistanceStore distances_between_stops_;
 
   template<typename F, typename T, typename I>
   [[nodiscard]] T SumDistances(I begin,

@@ -84,12 +84,8 @@ void TestRenderMap() {
                               "</svg>");
 }
 
+}
+
 void MapRendererRunTest() {
   TestRenderMap();
 }
-
-}
-
-//int main() {
-//  MapRendererRunTest();
-//}

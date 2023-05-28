@@ -135,15 +135,11 @@ void TestParseInput() {
   ASSERT_EQUAL(tc.GetAllBuses().size(), 3u);
 }
 
+}
+
 void InputReaderRunTest() {
   TestParseBusInput();
   TestParseStopInput();
   TestParseDistanceInput();
   TestParseInput();
 }
-
-}
-
-//int main() {
-//  InputReaderRunTest();
-//}
